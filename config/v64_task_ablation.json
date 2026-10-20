@@ -1,0 +1,14 @@
+{
+  "parent_config": "config/v63_residual_learning.json",
+  "candidate_years": [2023, 2024],
+  "inner_validation_days": 126,
+  "minimum_fit_days": 300,
+  "modes": ["joint", "sleeve_only", "asset_only"],
+  "seeds": [17, 29, 47],
+  "maximum_epochs": 1000,
+  "minimum_epochs": 50,
+  "patience_epochs": 40,
+  "validation_every": 5,
+  "formal_promotion": false,
+  "ppo_training_allowed": false
+}

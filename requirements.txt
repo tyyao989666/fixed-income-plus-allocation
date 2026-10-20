@@ -1,0 +1,16 @@
+pandas
+numpy
+pyarrow
+openpyxl
+PyYAML
+tushare
+skfolio
+langgraph
+pydantic>=2
+tabulate
+scipy
+matplotlib
+torch
+requests
+markdown-it-py
+lxml

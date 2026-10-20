@@ -1,0 +1,91 @@
+version: market_state_vae_v2_walk_forward
+
+data:
+  daily_config: config/itransformer_daily_config.yaml
+  market_state_cards: data_processed/market_state_cards_daily_v1.parquet
+  window_size_days: 20
+  start_date: "2018-01-02"
+  train_end: "2023-12-31"
+  validation_end: "2024-12-31"
+  final_date: "2026-07-15"
+  sleeve_windows_days: [5, 20, 60]
+  minimum_train_observations: 252
+  minimum_feature_train_coverage: 0.90
+  maximum_forward_fill_days: 5
+  macro_features:
+    - rate_treasury_y10
+    - rate_curve_10y_1y
+    - credit_spread_aaa_3y_proxy
+    - funding_dr007
+    - cb_cb_price_median
+    - cb_cb_premium_median
+    - equity_sw_l1_positive_5d_ratio
+    - equity_csi1000_pe
+    - alt_us_10y_yield
+    - alt_usd_index
+    - alt_nanhua_commodity
+    - alt_gold_au9999
+    - alt_real_rate_proxy
+
+preprocessing:
+  winsor_lower_quantile: 0.01
+  winsor_upper_quantile: 0.99
+  minimum_std: 0.000001
+
+model:
+  hidden_dim: 128
+  latent_dim: 4
+  beta_kl: 0.001
+  max_epochs: 300
+  minimum_epochs: 5
+  patience: 20
+  batch_size: 64
+  learning_rate: 0.0005
+  weight_decay: 0.0001
+  dropout: 0.05
+  gradient_clip: 1.0
+  seeds: [17, 29, 47]
+  kmeans_clusters: 4
+  kmeans_restarts: 20
+
+diagnostics:
+  anomaly_quantile: 0.95
+  extreme_anomaly_quantile: 0.99
+  warning_quantile: 0.90
+  minimum_confidence_multiplier: 0.40
+  drift_window_days: 5
+  transition_horizons_days: [5, 20]
+  oos_start: "2025-01-01"
+
+walk_forward:
+  enabled: true
+  folds:
+    - model_year: 2024
+      fit_end: "2022-12-31"
+      tune_end: "2023-12-31"
+      evaluation_end: "2024-12-31"
+    - model_year: 2025
+      fit_end: "2023-12-31"
+      tune_end: "2024-12-31"
+      evaluation_end: "2025-12-31"
+    - model_year: 2026
+      fit_end: "2024-12-31"
+      tune_end: "2025-12-31"
+      evaluation_end: "2026-07-15"
+
+outputs:
+  feature_frame: data_processed/market_state_vae_feature_frame.parquet
+  windows_npz: data_processed/market_state_vae_windows.npz
+  model: data_processed/market_state_vae_model.pt
+  model_dir: data_processed/market_state_vae_models
+  diagnostics: data_processed/market_state_vae_diagnostics_daily.parquet
+  training_log: output/reports/market_state_vae_training_log.csv
+  seed_summary: output/reports/market_state_vae_seed_summary.csv
+  axis_correlations: output/reports/market_state_vae_axis_correlations.csv
+  cluster_summary: output/reports/market_state_vae_cluster_summary.csv
+  anomaly_dates: output/reports/market_state_vae_top_anomalies.csv
+  transition_audit: output/reports/market_state_vae_transition_audit.csv
+  report: output/reports/market_state_vae_method_and_results.md
+  latent_plot: output/reports/market_state_vae_latent_space.png
+  loss_plot: output/reports/market_state_vae_loss_curves.png
+  timeline_plot: output/reports/market_state_vae_anomaly_timeline.png

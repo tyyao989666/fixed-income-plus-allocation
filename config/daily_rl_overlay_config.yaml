@@ -1,0 +1,75 @@
+enabled: true
+version: v1_daily_itransformer_ppo_overlay_dataset
+
+data:
+  start_date: "2018-01-02"
+  label_end: "2026-07-15"
+  train_end: "2022-12-31"
+  val_end: "2023-12-31"
+  horizon_days: 20
+  decision_frequency: month_end
+  profile: balanced
+  strategy_version: no_agent
+  feature_source_config: config/itransformer_daily_config.yaml
+  max_feature_count: 180
+
+weights:
+  no_agent_pattern: data_processed/v1_{profile}_sleeve_weights_monthly.parquet
+  agentic_pattern: data_processed/v1_agentic_{profile}_sleeve_weights_monthly.parquet
+
+action_space:
+  sleeves: [rates, credit, convertible_bonds, equity, alternatives]
+  max_tilt_per_step: 0.010
+  action_deadband: 0.35
+  sleeve_bounds:
+    low_vol:
+      rates: [0.38, 0.68]
+      credit: [0.25, 0.55]
+      convertible_bonds: [0.00, 0.04]
+      equity: [0.00, 0.03]
+      alternatives: [0.05, 0.18]
+    balanced:
+      rates: [0.25, 0.58]
+      credit: [0.20, 0.48]
+      convertible_bonds: [0.04, 0.10]
+      equity: [0.04, 0.12]
+      alternatives: [0.08, 0.22]
+    high_vol:
+      rates: [0.18, 0.42]
+      credit: [0.06, 0.25]
+      convertible_bonds: [0.10, 0.24]
+      equity: [0.12, 0.30]
+      alternatives: [0.18, 0.35]
+
+reward:
+  turnover_cost_bps: 5.0
+  volatility_penalty: 0.15
+  drawdown_penalty: 0.35
+  active_deviation_penalty: 0.20
+
+ppo:
+  seed: 42
+  hidden_dim: 128
+  learning_rate: 0.0003
+  epochs: 200
+  updates_per_epoch: 4
+  gamma: 0.98
+  gae_lambda: 0.90
+  clip_ratio: 0.20
+  value_loss_weight: 0.50
+  entropy_weight: 0.001
+  log_std_init: -2.0
+  behavior_clone_epochs: 120
+  behavior_clone_learning_rate: 0.0005
+  behavior_clone_action_scale: 0.35
+  behavior_clone_edge_threshold: 0.006
+  behavior_clone_value_weight: 0.20
+
+outputs:
+  dataset: data_processed/daily_rl_overlay_dataset.parquet
+  metadata: output/reports/daily_rl_overlay_dataset_metadata.json
+  report_md: output/reports/daily_rl_overlay_dataset_notes.md
+  env_smoke_test: output/reports/daily_ppo_overlay_env_smoke_test.json
+  ppo_model: data_processed/daily_ppo_overlay_controller.pt
+  ppo_training_log: output/reports/daily_ppo_overlay_training_log.csv
+  ppo_evaluation: output/reports/daily_ppo_overlay_evaluation.json

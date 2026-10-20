@@ -1,0 +1,70 @@
+enabled: true
+version: agentic_itransformer_v2_categorical_ppo_v2
+status: research_mandatory_overlay
+
+data:
+  predictions: data_processed/itransformer_daily_timing_v2_monthly_oos.parquet
+  returns: data_processed/asset_returns_monthly.parquet
+  baseline_asset_weights_pattern: data_processed/v1_agentic_{profile}_target_weights_monthly.parquet
+  baseline_sleeve_weights_pattern: data_processed/v1_agentic_{profile}_sleeve_weights_monthly.parquet
+  baseline_nav_pattern: output/reports/v1_agentic_{profile}_backtest_nav.csv
+  start_date: "2022-01-31"
+  end_date: "2026-04-30"
+
+actions:
+  names: [noop, follow_25, follow_50, follow_100, reverse_25, reverse_50]
+  levels: [0.00, 0.25, 0.50, 1.00, -0.25, -0.50]
+  warmup_action: follow_25
+  min_score_spread: 0.05
+  max_pair_transfer:
+    low_vol: 0.005
+    balanced: 0.010
+    high_vol: 0.020
+
+reward:
+  transaction_cost_bps: 5.0
+  downside_penalty: 0.20
+  active_deviation_penalty: 0.002
+  reward_scale: 100.0
+
+ppo:
+  seeds: [17, 29, 47]
+  hidden_dim: 16
+  learning_rate: 0.001
+  max_epochs: 300
+  updates_per_epoch: 4
+  gamma: 0.95
+  gae_lambda: 0.90
+  clip_ratio: 0.15
+  value_loss_weight: 0.50
+  entropy_weight: 0.005
+  behavior_clone_epochs: 40
+  validation_fraction: 0.25
+  min_train_rows: 10
+  evaluation_every: 10
+  early_stop_patience: 6
+  retrain_frequency: annual
+
+gate:
+  evaluation_start: "2024-01-31"
+  min_sharpe_delta: 0.0
+  min_annual_return_delta: 0.0
+  max_drawdown_worsening: 0.005
+
+outputs:
+  dataset_pattern: data_processed/agentic_itransformer_ppo_dataset_{profile}.parquet
+  decisions_pattern: data_processed/agentic_itransformer_ppo_decisions_{profile}.parquet
+  sleeve_weights_pattern: data_processed/v1_agentic_itppo_{profile}_sleeve_weights_monthly.parquet
+  asset_weights_pattern: data_processed/v1_agentic_itppo_{profile}_target_weights_monthly.parquet
+  nav_pattern: output/reports/v1_agentic_itppo_{profile}_backtest_nav.csv
+  metrics_pattern: output/reports/v1_agentic_itppo_{profile}_backtest_metrics.csv
+  training_log_pattern: output/reports/agentic_itransformer_ppo_training_log_{profile}.csv
+  model_dir: data_processed/agentic_itransformer_ppo_models
+  summary: output/reports/agentic_itransformer_ppo_three_profile_summary.csv
+  yearly: output/reports/agentic_itransformer_ppo_yearly_comparison.csv
+  gate_report: output/reports/agentic_itransformer_ppo_formal_gate.json
+  audit_csv: output/reports/agentic_itransformer_ppo_point_in_time_audit.csv
+  audit_md: output/reports/agentic_itransformer_ppo_point_in_time_audit.md
+  report_md: output/reports/agentic_itransformer_ppo_method_and_results.md
+  visual_report: output/reports/v1_agentic_itransformer_ppo_visual_report.html
+  figure_prefix: v1_agentic_itppo

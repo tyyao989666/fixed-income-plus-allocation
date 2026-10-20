@@ -1,0 +1,61 @@
+data:
+  ohlcv_features:
+    enabled: true
+    normalization_window: 20
+    winsor_quantile: 0.01
+    include_dispersion: true
+    winsor_window: 252
+    winsor_min_periods: 20
+
+daily_timing_v2:
+  experiment_name: itransformer_daily_v3_residual_robust
+  # 32 macro fields + 30 sleeve path fields + covered OHLCV structure fields.
+  # The network stays small; feature-family quotas prevent macro variables from
+  # accidentally crowding out the actual market path.
+  max_features: 72
+  required_ohlcv_suffixes:
+    - _ohlcv_close_position_median
+    - _ohlcv_close_position_dispersion
+  required_ohlcv_maximum_missing_rate: 0.40
+  d_model: 32
+  n_heads: 4
+  num_layers: 1
+  dropout: 0.35
+  epochs: 1000
+  batch_size: 64
+  learning_rate: 0.00025
+  weight_decay: 0.005
+  rank_loss_weight: 0.05
+  selection_rank_weight: 0.10
+  patience: 60
+  early_stopping_min_delta: 0.0001
+  progress_every_epochs: 10
+  seeds: [17, 42, 73]
+  residual_target: true
+  write_all_horizons: true
+  residual_alpha_grid: [0.0, 0.05, 0.10, 0.15, 0.25]
+  train_stride_days: 1
+  evaluation_stride_days: 5
+  folds:
+    - {name: wf_2022, fit_end: "2020-12-31", tune_end: "2021-12-31", evaluation_end: "2022-12-31"}
+    - {name: wf_2023, fit_end: "2021-12-31", tune_end: "2022-12-31", evaluation_end: "2023-12-31"}
+    - {name: wf_2024, fit_end: "2022-12-31", tune_end: "2023-12-31", evaluation_end: "2024-12-31"}
+    - {name: wf_2025, fit_end: "2023-12-31", tune_end: "2024-12-31", evaluation_end: "2025-12-31"}
+  final_train_end: "2025-12-31"
+  final_holdout_start: "2026-01-01"
+  formal_gate:
+    min_cv_median_rank_ic: 0.02
+    min_cv_fold_rank_ic: -0.03
+    min_holdout_rank_ic: 0.02
+    min_incremental_cv_rank_ic: 0.00
+    min_selected_residual_alpha: 0.05
+
+outputs:
+  timing_v2_frame: data_processed/itransformer_daily_timing_v3_frame.parquet
+  timing_v2_arrays: data_processed/itransformer_daily_timing_v3_arrays.npz
+  timing_v2_metadata: output/reports/itransformer_daily_timing_v3_metadata.json
+  timing_v2_model: data_processed/itransformer_daily_timing_v3_residual_robust_model.pt
+  timing_v2_predictions: data_processed/itransformer_daily_timing_v3_residual_robust_predictions.parquet
+  timing_v2_cv_report: output/reports/itransformer_daily_timing_v3_residual_robust_cv_report.csv
+  timing_v2_training_log: output/reports/itransformer_daily_timing_v3_residual_robust_training_log.csv
+  timing_v2_gate_report: output/reports/itransformer_daily_timing_v3_residual_robust_gate.json

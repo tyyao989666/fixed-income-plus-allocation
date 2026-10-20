@@ -1,0 +1,83 @@
+version: relative_itransformer_ep_target_v4
+profiles: [low_vol, balanced, high_vol]
+
+data:
+  predictions: data_processed/itransformer_daily_timing_v3_residual_robust_predictions.parquet
+  itransformer_gate_report: output/reports/itransformer_daily_timing_v3_residual_robust_gate.json
+  state_cards: data_processed/market_state_cards_daily_v1.parquet
+  rule_views: data_processed/market_skill_views_mechanical_daily_v1.parquet
+  asset_returns: data_processed/asset_returns_daily.parquet
+  risk_budget_pattern: data_processed/v1_{profile}_risk_budget_base_monthly.parquet
+  formal_sleeve_pattern: data_processed/v1_{profile}_sleeve_weights_monthly.parquet
+  formal_asset_pattern: data_processed/v1_{profile}_target_weights_monthly.parquet
+  start_date: "2018-01-01"
+  reliability_window: 120
+  reliability_min_observations: 40
+
+actions:
+  formal_anchor_horizon_days: 20
+  rule_horizon_days: 20
+  horizons_days: [5, 20, 60]
+  minimum_model_reliability: 0.02
+  full_model_reliability: 0.12
+  # The model score is already baseline + a causally selected residual alpha.
+  # Permit small rolling non-inferiority, but never an unselected residual.
+  minimum_incremental_reliability: -0.010
+  full_incremental_reliability: 0.12
+  minimum_selected_residual_alpha: 0.05
+  residual_alpha_reference: 0.25
+  max_itransformer_weight: 1.00
+  minimum_score_spread: 0.08
+  # Historical replay must not use an ex-post whole-sample gate. It uses only
+  # matured rolling reliability; the whole-sample gate is promotion-only.
+  require_formal_itransformer_gate: false
+
+views:
+  rule_weight: 1.00
+  model_weight: 0.60
+  canonical_horizon_weights:
+    5: 0.20
+    20: 0.50
+    60: 0.30
+  uncertainty_scale: 0.75
+  grid_positive_floor: 0.20
+  daily_mu_scale:
+    low_vol: 0.0015
+    balanced: 0.0030
+    high_vol: 0.0050
+  covariance_lookback_days: 252
+  minimum_covariance_days: 60
+  covariance_monthly_scale: 21.0
+  covariance_estimator:
+    method: sample_shrink
+    shrinkage_to_diag: 0.20
+
+optimizer:
+  low_vol:
+    base_deviation_penalty: 0.55
+    turnover_penalty: 0.00
+    max_active_deviation: 0.010
+    max_sleeve_turnover: 0.035
+  balanced:
+    base_deviation_penalty: 0.30
+    turnover_penalty: 0.00
+    max_active_deviation: 0.022
+    max_sleeve_turnover: 0.070
+  high_vol:
+    base_deviation_penalty: 0.16
+    turnover_penalty: 0.00
+    max_active_deviation: 0.040
+    max_sleeve_turnover: 0.110
+
+trend_brake:
+  enabled: true
+  lookbacks_days: [63, 126, 252]
+  weak_threshold: -0.35
+  max_underweight_from_base:
+    low_vol: 0.004
+    balanced: 0.008
+    high_vol: 0.015
+  affected_sleeves: [convertible_bonds, equity, alternatives]
+
+reward:
+  transaction_cost_bps: 10.0

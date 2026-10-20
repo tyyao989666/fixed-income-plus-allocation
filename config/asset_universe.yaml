@@ -1,0 +1,203 @@
+project:
+  name: fixed_income_plus_allocation
+  start_date: "20180101"
+  end_date: "20260812"
+  convertible_bond_max_codes: 260
+  sleep_seconds: 0.08
+
+# Static source definitions. The 12 convertible-bond style buckets are created
+# point-in-time from the CB database and are materialized in asset_universe.parquet.
+assets:
+  - code: rate_1_3y
+    name: "利率债1-3Y"
+    module: rates
+    source_type: ifind_index_daily
+    ts_code: CBA00621.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond treasury wealth index; not an ETF price."
+  - code: rate_3_5y
+    name: "利率债3-5Y"
+    module: rates
+    source_type: ifind_index_daily
+    ts_code: CBA00631.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond treasury wealth index; not an ETF price."
+  - code: rate_7_10y
+    name: "利率债7-10Y"
+    module: rates
+    source_type: ifind_index_daily
+    ts_code: CBA00651.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond treasury wealth index; not an ETF price."
+  - code: rate_30y
+    name: "超长利率债30Y"
+    module: rates
+    source_type: ifind_index_daily
+    ts_code: CBA00661.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond 10Y-plus treasury wealth index used as the 30Y duration proxy; not an ETF price."
+
+  - code: credit_lgfv_aaa
+    name: "城投债AAA"
+    module: credit
+    source_type: fund_daily
+    ts_code: 511220.SH
+    data_source: tushare
+    note: "ETF proxy; credit-rating segmentation is supplied by index data where available."
+  - code: credit_lgfv_aa_plus
+    name: "城投债AA+"
+    module: credit
+    source_type: ifind_index_daily
+    ts_code: 931740.CSI
+    data_source: ifind_index_data
+    note: "Index-level proxy, not a directly tradable single instrument."
+  - code: credit_lgfv_aa
+    name: "城投债AA"
+    module: credit
+    source_type: ifind_index_daily
+    ts_code: H11098.CSI
+    data_source: ifind_index_data
+    note: "Index-level proxy, not a directly tradable single instrument."
+  - code: credit_ind_aaa
+    name: "产业债AAA"
+    module: credit
+    source_type: ifind_index_daily
+    ts_code: CBA04201.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond corporate-bond wealth index proxy."
+  - code: credit_ind_aa_plus
+    name: "产业债AA+"
+    module: credit
+    source_type: ifind_index_daily
+    ts_code: CBA04101.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond corporate-bond wealth index proxy."
+  - code: credit_ind_aa
+    name: "产业债AA"
+    module: credit
+    source_type: ifind_index_daily
+    ts_code: CBA04001.CB
+    data_source: ifind_chinabond_wealth_index
+    note: "ChinaBond corporate-bond wealth index proxy."
+
+  - code: equity_tech_growth
+    name: "科技成长"
+    module: equity
+    source_type: wind_index_daily
+    ts_code: 000688.SH
+    data_source: wind_underlying_index
+    note: "STAR 50 underlying index; available only after its publication date."
+  - code: equity_chinext
+    name: "创业板"
+    module: equity
+    source_type: fund_daily
+    ts_code: 159915.SZ
+    data_source: tushare
+    note: "ChiNext ETF proxy."
+  - code: equity_csi1000
+    name: "中证1000"
+    module: equity
+    source_type: wind_index_daily
+    ts_code: 000852.SH
+    data_source: wind_underlying_index
+    note: "CSI 1000 underlying-index proxy."
+  - code: equity_manufacturing
+    name: "制造业"
+    module: equity
+    source_type: wind_index_daily
+    ts_code: 930850.CSI
+    data_source: wind_underlying_index
+    note: "Manufacturing thematic index proxy."
+  - code: equity_consumption
+    name: "消费"
+    module: equity
+    source_type: wind_index_daily
+    ts_code: 000932.SH
+    data_source: wind_underlying_index
+    note: "Consumption index proxy."
+  - code: equity_healthcare
+    name: "医药医疗"
+    module: equity
+    source_type: wind_index_daily
+    ts_code: 000933.SH
+    data_source: wind_underlying_index
+    note: "Healthcare index proxy."
+  - code: equity_fin_property
+    name: "金融地产"
+    module: equity
+    source_type: fund_daily
+    ts_code: 159940.SZ
+    data_source: tushare
+    note: "Financial-property ETF proxy."
+  - code: equity_cyclical
+    name: "周期资源"
+    module: equity
+    source_type: fund_daily
+    ts_code: 510170.SH
+    data_source: tushare
+    note: "Commodity-equity ETF proxy."
+  - code: equity_dividend_utility
+    name: "红利公用"
+    module: equity
+    source_type: fund_daily
+    ts_code: 510880.SH
+    data_source: tushare
+    note: "Dividend ETF proxy."
+  - code: equity_broad
+    name: "宽基权益"
+    module: equity
+    source_type: fund_daily
+    ts_code: 510300.SH
+    data_source: tushare
+    note: "CSI 300 ETF proxy."
+
+  - code: alt_reits
+    name: "公募REITs等权"
+    module: alternatives
+    source_type: reits_equal_weight
+    ts_code: REITS_EQUAL_WEIGHT
+    data_source: tushare_first9_reits_equal_weight
+    note: "Equal-weight public REITs proxy, available only after the first constituent listings."
+  - code: alt_gold
+    name: "黄金"
+    module: alternatives
+    source_type: fund_daily
+    ts_code: 518880.SH
+    data_source: tushare
+    note: "Gold ETF proxy."
+  - code: alt_commodity
+    name: "南华商品"
+    module: alternatives
+    source_type: ifind_index_daily
+    ts_code: NH0100.NHF
+    data_source: wind_nanhua
+    note: "Nanhua commodity index proxy."
+  - code: alt_nonferrous
+    name: "南华有色"
+    module: alternatives
+    source_type: ifind_index_daily
+    ts_code: NH0700.NHF
+    data_source: wind_nanhua
+    note: "Nanhua nonferrous index proxy."
+  - code: alt_chemical
+    name: "南华能化"
+    module: alternatives
+    source_type: ifind_index_daily
+    ts_code: NH0500.NHF
+    data_source: wind_nanhua
+    note: "Nanhua energy-chemicals index proxy."
+  - code: alt_us_bond
+    name: "美债10Y曲线代理"
+    module: alternatives
+    source_type: ifind_curve_proxy
+    ts_code: USGG10YR
+    data_source: ifind_us10y_curve_proxy
+    note: "Duration-7.5 US Treasury curve proxy; not a directly tradable ETF price."
+
+convertible_bond_subindices:
+  enabled: true
+  module: convertible_bonds
+  size_split: issue_size_median
+  price_low_threshold: 120
+  bond_style_upper: 110
+  balanced_style_upper: 130

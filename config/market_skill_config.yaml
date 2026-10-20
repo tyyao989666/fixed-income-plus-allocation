@@ -1,0 +1,188 @@
+enabled: true
+version: market_skill_v1
+principle: "Deterministic context first; LLM or mechanical view generation only inside validated rule bounds."
+
+# The formal no-Agent release uses the last date available for every raw asset.
+# State cards must not silently consume a newer partial cross-section.
+release:
+  daily_as_of_date: "2026-07-20"
+
+# A single canonical definition is required across state cards, V1 weights and
+# the daily iTransformer.  The raw rate_30y wealth index remains in the raw
+# dataset for traceability, but is not used by the decision state.
+canonical_assets:
+  rate_30y:
+    enabled: true
+    raw_code_to_replace: rate_30y
+    canonical_code: rate_30y_curve_proxy
+    asset_name: "30Y国债曲线代理"
+    yield_column: treasury_y30
+    modified_duration: 18.5
+    base_close: 100.0
+
+view_generation:
+  active_source: mechanical
+  mechanical_mode: executable
+  allow_cash_views: false
+  allowed_assets:
+    - rates_long_duration
+    - credit
+    - convertible_bonds
+    - equity
+    - gold
+    - alternatives
+    - rate_1_3y
+    - rate_3_5y
+    - rate_7_10y
+    - rate_30y_curve_proxy
+    - credit_lgfv_aaa
+    - credit_lgfv_aa_plus
+    - credit_lgfv_aa
+    - credit_ind_aaa
+    - credit_ind_aa_plus
+    - credit_ind_aa
+    - equity_broad
+    - equity_chinext
+    - equity_csi1000
+    - equity_tech_growth
+    - equity_dividend_utility
+    - equity_manufacturing
+    - equity_consumption
+    - equity_healthcare
+    - equity_fin_property
+    - equity_cyclical
+    - alt_gold
+    - alt_commodity
+    - alt_nonferrous
+    - alt_chemical
+    - alt_us_bond
+    - alt_reits
+
+llm_views:
+  enabled: true
+  provider: bigmodel
+  model: glm-5.1
+  base_url: https://open.bigmodel.cn/api/paas/v4
+  api_key_env: BIGMODEL_API_KEY
+  frequency: month_end
+  temperature: 0.1
+  max_tokens: 1200
+  timeout_seconds: 90
+  max_views_per_date: 3
+  request_delay_seconds: 0.2
+
+windows:
+  short: 5
+  medium: 20
+  percentile_min_periods: 252
+
+state_thresholds:
+  credit:
+    cheap_pct: 0.70
+    thin_pct: 0.25
+    widening_20d_bp: 0.08
+    funding_stress_high: 0.70
+    spread_widening_pressure_high: 0.65
+    turnover_stress_high: 0.70
+    tail_risk_high: 0.65
+    regional_default_pressure_high: 0.65
+    cr2_caution_threshold: 0.50
+    credit_positive_threshold: 0.60
+    credit_negative_threshold: 0.60
+  rates:
+    bull_20d_bp: -0.08
+    bear_20d_bp: 0.08
+    curve_flat_30y_10y: 0.35
+    bond_strong_threshold: 0.58
+    bond_weak_threshold: 0.42
+  cb:
+    cheap_price: 115
+    expensive_price: 135
+    low_price_ratio_high: 0.25
+    callable_pressure_high: 0.20
+    premium_input_unit: percent
+    premium_penalty_start_ratio: 0.45
+    premium_penalty_scale: 0.20
+    premium_penalty_cap: 0.08
+  equity:
+    breadth_strong: 0.60
+    breadth_weak: 0.35
+    valuation_high_pct: 0.75
+    valuation_low_pct: 0.25
+    equity_strong_threshold: 0.58
+    equity_weak_threshold: 0.42
+  alt:
+    reits_yield_high: 5.0
+    reits_yield_low: 3.5
+    momentum_20d_strong: 0.03
+    momentum_20d_weak: -0.03
+
+asset_state_cards:
+  positive_score: 0.62
+  negative_score: 0.38
+  min_coverage_60d: 0.60
+  min_history_days: 20
+  max_staleness_days: 5
+  return_scales:
+    rates:
+      ret_5d: 0.004
+      ret_20d: 0.012
+      ret_60d: 0.025
+      drawdown_60d: 0.025
+    credit:
+      ret_5d: 0.003
+      ret_20d: 0.008
+      ret_60d: 0.015
+      drawdown_60d: 0.015
+    convertible_bonds:
+      ret_5d: 0.015
+      ret_20d: 0.045
+      ret_60d: 0.090
+      drawdown_60d: 0.100
+    equity:
+      ret_5d: 0.025
+      ret_20d: 0.070
+      ret_60d: 0.140
+      drawdown_60d: 0.150
+    alternatives:
+      ret_5d: 0.020
+      ret_20d: 0.060
+      ret_60d: 0.120
+      drawdown_60d: 0.150
+
+skill_layers:
+  P1_always:
+    - "Never output final portfolio weights."
+    - "All views must respect hard rule filters and current eligible universe."
+    - "Unpublished macro data must not be fabricated or forward-filled into core truth tables."
+  P2_baseline:
+    - "Use target risk budget as the neutral anchor; views are tilts around the anchor."
+    - "Prefer lower turnover unless multiple risk states align."
+  P3_stable_principles:
+    - "Fixed-income-plus portfolios prioritize drawdown control and liquidity."
+    - "Credit is a carry sleeve unless spread compensation is high and tail risk is controlled."
+    - "Convertible bonds need both valuation discipline and equity environment confirmation."
+  P4_context_specific:
+    CR1: "Credit spread compensation is attractive; allow moderate credit carry overweight within issuer/rating limits."
+    CR2: "Credit is neutral; only allow credit overweight when spread, turnover, funding and tail-risk checks are not in caution."
+    CR3: "Credit spread compensation is thin; avoid aggressive lower-rated credit exposure."
+    CR4: "Credit widening or funding pressure is rising; tighten credit bounds."
+    R1: "Rates rally confirmation; allow duration overweight if risk budget permits."
+    R4: "Rates selloff pressure; constrain long-duration exposure."
+    CB1: "Convertible valuation is favorable; allow selective CB overweight."
+    CB4: "Convertible valuation is expensive; block strong CB overweight views."
+    EQ1: "Equity breadth is supportive; allow equity-relative positive views."
+    EQ4: "Equity breadth is weak or valuation stretched; block aggressive equity overweight views."
+  P5_stress_overrides:
+    - "If liquidity stress is active, suppress long-duration, lower-rated credit, and high-beta CB views."
+    - "If multiple risk-off states align, prefer neutral or defensive views over return-seeking views."
+
+view_schema:
+  required_fields:
+    - date
+    - source_asset
+    - target_asset
+    - relation
+    - confidence
+    - reason_tags
+    - validator_status

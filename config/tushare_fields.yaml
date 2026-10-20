@@ -1,0 +1,12 @@
+fund_daily:
+  date: trade_date
+  close: close
+  pct_chg: pct_chg
+index_daily:
+  date: trade_date
+  close: close
+  pct_chg: pct_chg
+cb_daily:
+  date: trade_date
+  close: close
+  pct_chg: pct_chg

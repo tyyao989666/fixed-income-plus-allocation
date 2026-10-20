@@ -1,0 +1,2 @@
+enabled: false
+note: 数据准备阶段不做Entropy Pooling。

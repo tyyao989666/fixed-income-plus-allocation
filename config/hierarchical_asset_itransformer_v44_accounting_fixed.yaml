@@ -1,0 +1,31 @@
+base_config: hierarchical_asset_itransformer_v43_clean_calendar.yaml
+version: hierarchical_asset_itransformer_v44_accounting_fixed
+
+controller:
+  # Small actor/critic batches benefit from avoiding CPU thread-pool overhead.
+  torch_threads: 1
+
+# Frozen forecasting artifacts are reused: their economic labels are unchanged.
+# Execution targets/rewards and PPO checkpoints must be rebuilt independently.
+portfolio:
+  frozen_asset_returns: data_processed/v44_frozen_returns_long.parquet
+  frozen_state_cards: data_processed/v44_state_cards_daily.parquet
+  frozen_rule_views: data_processed/v44_mechanical_views_daily.parquet
+  formal_anchor_pattern: data_processed/v44_{profile}_target_weights_monthly.parquet
+  risk_budget_pattern: data_processed/v44_{profile}_risk_budget_base_monthly.parquet
+  formal_sleeve_pattern: data_processed/v44_{profile}_sleeve_weights_monthly.parquet
+
+outputs:
+  controller_model_dir: data_processed/hierarchical_asset_itransformer_v44_accounting_fixed_controller_models
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v44_accounting_fixed_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v44_accounting_fixed_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v44_accounting_fixed_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_point_in_time_audit.csv
+  bootstrap_report: output/reports/hierarchical_asset_itransformer_v44_accounting_fixed_bootstrap_robustness.csv

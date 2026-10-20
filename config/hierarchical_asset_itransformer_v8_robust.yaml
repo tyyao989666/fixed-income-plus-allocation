@@ -1,0 +1,177 @@
+version: hierarchical_asset_itransformer_v8_robust
+
+data:
+  asset_returns: data_processed/asset_returns_daily.parquet
+  macro_panel: data_processed/feature_panel_daily_v43.parquet
+  state_cards: data_processed/market_state_cards_daily_v1.parquet
+  sequence_length_days: 120
+  horizons_days: [5, 20, 60]
+  start_date: "2018-01-02"
+  prediction_start: "2022-01-01"
+  final_date: "2026-07-15"
+  excluded_context_assets: [rate_30y]
+  synthetic_rate_config: config/itransformer_daily_config.yaml
+  macro_features:
+    - rate_treasury_y10
+    - rate_treasury_y30
+    - credit_spread_aaa_3y_proxy
+    - credit_spread_aa_3y_proxy
+    - funding_dr007
+    - funding_shibor_3m
+    - cb_cb_price_median
+    - cb_cb_premium_median
+    - equity_csi1000_pe
+    - equity_csi1000_pb
+    - alt_us_10y_yield
+    - alt_usd_index
+    - alt_nanhua_commodity
+    - alt_gold_au9999
+    - alt_real_rate_proxy
+    - alt_reits_distribution_yield
+  local_windows_days: [5, 20, 60, 120]
+  expected_return_window_days: 252
+  expected_return_min_days: 126
+  volatility_window_days: 60
+  volatility_min_days: 40
+  minimum_future_coverage: 0.90
+  train_stride_days: 1
+  prediction_stride_days: 1
+  target_clip: 4.0
+  asset_downside_penalty: 0.05
+  sleeve_downside_penalty: 0.15
+
+preprocessing:
+  clip: 5.0
+  fast_window_days: 252
+  fast_min_days: 60
+  level_window_days: 756
+  level_min_days: 126
+  macro_delta_days: 20
+
+model:
+  d_model: 48
+  n_heads: 4
+  num_layers: 2
+  dim_feedforward: 128
+  local_n_heads: 4
+  local_num_layers: 0
+  local_dim_feedforward: 96
+  dropout: 0.25
+  asset_embedding_dim: 48
+  module_embedding_dim: 48
+  max_epochs: 1000
+  batch_size: 128
+  learning_rate: 0.000075
+  weight_decay: 0.003
+  early_stopping_enabled: true
+  patience: 80
+  minimum_epochs: 40
+  warmup_epochs: 10
+  scheduler_decay_epochs: 350
+  minimum_learning_rate_ratio: 0.05
+  min_delta: 0.0001
+  progress_every_epochs: 10
+  seeds: [17, 29, 47]
+  asset_loss_weight: 1.00
+  sleeve_loss_weight: 0.90
+  rank_loss_weight: 0.35
+  uncertainty_weight: 0.05
+  horizon_loss_weights: [0.20, 0.50, 0.30]
+  gradient_clip: 1.0
+  regime_balanced_sampling: true
+  regime_sampling_power: 0.50
+  regime_sampling_max_weight_ratio: 4.0
+  validation_regime_balance_weight: 0.35
+  validation_year_balance_weight: 0.25
+  validation_subgroup_min_samples: 40
+  checkpoint_rank_reward: 0.75
+  checkpoint_average_top_k: 5
+  checkpoint_average_max_loss_degradation: 0.01
+  checkpoint_average_max_rank_degradation: 0.005
+  checkpoint_average_max_objective_degradation: 0.005
+  residual_alpha_grid: [0.00, 0.10, 0.25, 0.50, 0.75, 1.00]
+  asset_residual_alpha_grid: [0.00, 0.10, 0.25]
+  sleeve_residual_alpha_grid: [0.00, 0.10, 0.25]
+  baseline_weight_grid: [0.00, 0.25, 0.50, 0.75, 1.00]
+  blend_validation_regime_weight: 0.35
+  blend_validation_year_weight: 0.25
+  blend_stability_penalty: 0.10
+
+walk_forward:
+  first_prediction_year: 2022
+  validation_fraction: 0.25
+  minimum_train_samples: 300
+  minimum_validation_samples: 120
+  purge_by_max_label_end: true
+
+gate:
+  evaluation_start: "2024-01-01"
+  min_asset_rank_ic: 0.03
+  min_sleeve_rank_ic: 0.03
+  min_asset_incremental_rank_ic: 0.005
+  min_sleeve_incremental_rank_ic: 0.005
+  min_positive_year_fraction: 0.60
+
+portfolio:
+  integrated_base_config: config/integrated_daily_view_ppo_config.yaml
+  transaction_cost_bps: 5.0
+  asset_score_horizon_days: 20
+  asset_tilt_strength:
+    low_vol: 0.10
+    balanced: 0.25
+    high_vol: 0.40
+  max_asset_share_of_sleeve: 0.75
+  max_asset_active_weight:
+    low_vol: 0.004
+    balanced: 0.010
+    high_vol: 0.020
+
+controller:
+  action_fractions: [0.00, 0.25, 0.50, 1.00]
+  hidden_dim: 32
+  seeds: [17, 29, 47]
+  max_epochs: 120
+  updates_per_epoch: 4
+  learning_rate: 0.0005
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_ratio: 0.15
+  value_loss_weight: 0.50
+  entropy_weight: 0.004
+  validation_fraction: 0.20
+  patience: 8
+  minimum_qualified_models: 2
+  minimum_validation_edge: 0.0002
+  mechanical_no_trade_l1:
+    low_vol: 0.008
+    balanced: 0.010
+    high_vol: 0.012
+  minimum_hold_days:
+    low_vol: 3
+    balanced: 2
+    high_vol: 1
+  uncertainty_penalty: 0.25
+  active_weight_penalty: 0.002
+
+outputs:
+  dataset_npz: data_processed/hierarchical_asset_itransformer_v8_robust_dataset.npz
+  metadata: output/reports/hierarchical_asset_itransformer_v8_robust_metadata.json
+  model_dir: data_processed/hierarchical_asset_itransformer_v8_robust_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v8_robust_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v8_robust_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v8_robust_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v8_robust_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v8_robust_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v8_robust_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v8_robust_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v8_robust_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v8_robust_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v8_robust_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v8_robust_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v8_robust_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v8_robust_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v8_robust_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v8_robust_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v8_robust_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v8_robust_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v8_robust_point_in_time_audit.csv

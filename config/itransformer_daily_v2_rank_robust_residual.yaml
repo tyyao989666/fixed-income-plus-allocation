@@ -1,0 +1,33 @@
+daily_timing_v2:
+  experiment_name: itransformer_daily_v2_rank_robust_residual_64d_2l_4h
+  d_model: 64
+  n_heads: 4
+  num_layers: 2
+  dropout: 0.35
+  epochs: 300
+  learning_rate: 0.0002
+  weight_decay: 0.003
+  patience: 30
+  early_stopping_min_delta: 0.00005
+  progress_every_epochs: 10
+  rank_loss_weight: 0.50
+  selection_rank_weight: 0.50
+  horizon_loss_weights: [0.15, 0.70, 0.15]
+  residual_target: true
+  residual_alpha_grid: [0.00, 0.10, 0.25, 0.50, 0.75, 1.00]
+  write_all_horizons: true
+  torch_num_threads: 8
+  torch_num_interop_threads: 1
+  formal_gate:
+    min_cv_median_rank_ic: 0.05
+    min_cv_fold_rank_ic: -0.02
+    min_holdout_rank_ic: 0.03
+    min_incremental_cv_rank_ic: 0.00
+    min_selected_residual_alpha: 0.05
+
+outputs:
+  timing_v2_model: data_processed/itransformer_daily_timing_v2_rank_robust_residual_model.pt
+  timing_v2_predictions: data_processed/itransformer_daily_timing_v2_rank_robust_residual_predictions.parquet
+  timing_v2_cv_report: output/reports/itransformer_daily_timing_v2_rank_robust_residual_cv_report.csv
+  timing_v2_training_log: output/reports/itransformer_daily_timing_v2_rank_robust_residual_training_log.csv
+  timing_v2_gate_report: output/reports/itransformer_daily_timing_v2_rank_robust_residual_formal_gate.json

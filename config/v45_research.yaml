@@ -1,0 +1,116 @@
+version: v45_solver_prediction_execution
+design: docs/v45_solver_prediction_execution_plan_20261014.md
+research_only_until_all_gates_pass: true
+profiles: [low_vol, balanced, high_vol]
+data:
+  dataset: data_processed/v45_dataset.npz
+  metadata: output/reports/v45_metadata.json
+  start_date: '2018-01-02'
+  final_date: '2026-07-15'
+  sequence_length_days: 120
+  horizons_days: [5, 20, 60]
+  expected_asset_count: 38
+  fetch_external_data: false
+  use_agentic: false
+  unverified_macro_policy: exclude_from_strict_forecast
+walk_forward:
+  years: [2022, 2023, 2024, 2025, 2026]
+  validation_days: 126
+  gate_days: 126
+  purge_days: 60
+  minimum_train_days: 300
+  final_refit_after_gate: false
+model:
+  d_model: 40
+  n_heads: 4
+  num_layers: 2
+  dim_feedforward: 112
+  dropout: 0.25
+  seeds: [17, 29, 47]
+  sequence_length_days: 120
+  candidates: [F0, F1, F2, F3]
+  max_epochs: 1000
+  minimum_epochs: 50
+  validation_every_epochs: 5
+  patience_epochs: 40
+  head_only_epochs: 20
+  batch_size: 96
+  head_learning_rate: 0.0002
+  encoder_learning_rate: 0.00001
+  weight_decay: 0.04
+  gradient_clip: 1.0
+  huber_beta: 1.0
+  pairwise_loss_weight: 0.20
+  horizon_weights: [0.15, 0.50, 0.35]
+  ridge_alpha_per_training_cell: 0.30
+  torch_threads: 2
+  seed_workers: 3
+  feature_clip_mad_multiplier: 20.0
+  feature_clip_scale_floor: 1.0
+pretraining:
+  max_epochs: 1000
+  minimum_epochs: 100
+  batch_size: 64
+  learning_rate: 0.0002
+  weight_decay: 0.01
+  relative_min_delta: 0.003
+  validation_every_epochs: 5
+  patience_epochs: 40
+  mask_mode: mixed_causal_suffix
+  causal_suffix_days: [1, 5, 20]
+  full_path_mask_fraction: 0.25
+forecast_gate:
+  minimum_asset_rank_ic: 0.10
+  minimum_sleeve_rank_ic: 0.12
+  minimum_delta_rank_ic_vs_F0: 0.01
+  minimum_positive_seeds: 2
+  prior_oos_minimum_years: 2
+  prior_oos_minimum_asset_rank_ic: 0.04
+  prior_oos_minimum_sleeve_rank_ic: 0.05
+  bootstrap_draws: 3000
+  bootstrap_block_days: 60
+  one_sided_confidence: 0.90
+  fdr: 0.10
+controller:
+  years: [2024, 2025, 2026]
+  seeds: [17, 29, 47]
+  action_fractions: [0.0, 0.25, 0.50, 1.0]
+  hidden_dim: 32
+  max_epochs: 120
+  updates_per_epoch: 4
+  learning_rates: [0.0001, 0.0003]
+  entropy_weights: [0.004, 0.01]
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_ratio: 0.15
+  value_loss_weight: 0.50
+  teacher_horizon_days: 5
+  teacher_pretrain_epochs: 30
+  teacher_policy_loss_weight: 0.15
+  selection_fraction: 0.10
+  deployment_gate_fraction: 0.10
+  purge_days: 20
+  minimum_train_days: 252
+  minimum_qualified_models: 2
+  torch_threads: 1
+portfolio:
+  anchor_policy: closest_feasible_anchor_joint_projection_v1
+  no_cash: true
+  leverage: 1.0
+  transaction_cost_bps: 5.0
+  start_date: '2022-01-05'
+  end_date: '2026-07-15'
+  max_asset_share_of_sleeve: 0.75
+  asset_active_limits: {low_vol: 0.004, balanced: 0.010, high_vol: 0.020}
+  daily_active_limits: {low_vol: 0.012, balanced: 0.022, high_vol: 0.036}
+  daily_target_change_limits: {low_vol: 0.04, balanced: 0.08, high_vol: 0.11}
+  minimum_hold_days: {low_vol: 3, balanced: 2, high_vol: 1}
+evaluation:
+  annual_sessions: 252
+  risk_free_rate: 0.0
+  cost_stress_bps: [5, 10, 20]
+  bootstrap_draws: 3000
+  bootstrap_block_days: [20, 60]
+  minimum_return_positive_probability: 0.80
+  minimum_sharpe_positive_probability: 0.60
+  new_holdout_claim_allowed: false

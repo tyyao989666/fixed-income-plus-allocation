@@ -1,0 +1,105 @@
+base_config: hierarchical_asset_itransformer_v15_relative_alpha.yaml
+version: hierarchical_asset_itransformer_v19_pretrained_residual
+
+model:
+  prediction_target_mode: residual_rank
+  prediction_head_mode: unconstrained
+  # The learned correction is projected orthogonal to the causal momentum
+  # baseline in every date/horizon/sleeve cross-section. This prevents the
+  # trivial target-minus-baseline shortcut from becoming an anti-momentum bet.
+  orthogonal_residual: true
+  d_model: 40
+  n_heads: 4
+  num_layers: 2
+  dim_feedforward: 112
+  dropout: 0.25
+  learning_rate: 0.00006
+  weight_decay: 0.020
+  minimum_epochs: 25
+  patience: 35
+  warmup_epochs: 8
+  scheduler_decay_epochs: 160
+  checkpoint_selection_mode: rank_constrained
+  checkpoint_rank_loss_relative_tolerance: 0.15
+  checkpoint_rank_min_score: 0.05
+  checkpoint_average_top_k: 3
+
+  # The encoder first learns to recover deliberately hidden point-in-time
+  # variable histories. This consumes no future return labels. The 1000-epoch
+  # value is a ceiling; validation early stopping controls the actual run.
+  self_supervised_pretraining:
+    enabled: true
+    max_epochs: 1000
+    minimum_epochs: 30
+    patience: 25
+    min_delta: 0.0005
+    learning_rate: 0.00020
+    weight_decay: 0.010
+    batch_size: 64
+    local_mask_probability: 0.18
+    macro_mask_probability: 0.18
+    macro_loss_weight: 0.50
+    validation_fraction: 0.15
+    minimum_samples: 240
+    minimum_validation_samples: 60
+    validation_purge_days: 20
+    freeze_encoder_epochs: 8
+    gradient_clip: 1.0
+    progress_every_epochs: 10
+
+  # Final alpha is calibrated only from already-realized annual walk-forward
+  # predictions, never from the current fold's validation block.
+  blend_selection_source: prior_walkforward_oos
+  blend_min_calibration_years: 2
+  residual_alpha_grid: [0.00, 0.025, 0.05, 0.10, 0.20, 0.35]
+  asset_residual_alpha_grid: [0.00, 0.025, 0.05, 0.10, 0.20]
+  sleeve_residual_alpha_grid: [0.00, 0.025, 0.05, 0.10, 0.20, 0.35]
+  blend_min_rank_ic_improvement: 0.004
+  blend_min_full_rank_ic_improvement: 0.002
+  blend_min_absolute_rank_ic: 0.04
+  blend_min_positive_subgroup_fraction: 0.60
+
+gate:
+  min_asset_rank_ic: 0.08
+  min_sleeve_rank_ic: 0.04
+  min_asset_incremental_rank_ic: 0.002
+  min_sleeve_incremental_rank_ic: 0.002
+  min_positive_year_fraction: 0.60
+
+controller:
+  # PPO may still learn execution from the pretrained representation when a
+  # forecast alpha is gated to zero. It never receives permission to invent a
+  # direction or violate the EP/skfolio target.
+  enabled_only_after_forecast_gate: false
+  selection_validation_fraction: 0.10
+  deployment_gate_fraction: 0.10
+  validation_purge_days: 20
+  deployment_gate_blocks: 3
+  minimum_deployment_gate_blocks: 3
+  minimum_deployment_positive_fraction: 0.6666667
+  minimum_deployment_worst_edge: -0.002
+  minimum_validation_edge: 0.0003
+
+outputs:
+  dataset_npz: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_dataset.npz
+  metadata: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_metadata.json
+  label_diagnostics: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_label_diagnostics.csv
+  model_dir: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v19_pretrained_residual_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v19_pretrained_residual_point_in_time_audit.csv

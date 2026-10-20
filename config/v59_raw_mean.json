@@ -1,0 +1,21 @@
+{
+  "version": "v59_raw_mean_validation_only",
+  "years": [2022, 2023],
+  "seeds": [17, 29, 47],
+  "candidates": ["linear", "regularized"],
+  "maximum_epochs": 1000,
+  "minimum_epochs": 50,
+  "patience_epochs": 40,
+  "validation_every": 5,
+  "batch_size": 96,
+  "learning_rate": 0.0002,
+  "weight_decay": 0.1,
+  "dropout": 0.4,
+  "mean_weight": 1.0,
+  "pinball_weight": 0.25,
+  "rank_weight": 0.05,
+  "minimum_mean_validation_improvement": 0.02,
+  "minimum_seed_validation_improvement": 0.0,
+  "read_gate_or_test_labels": false,
+  "formal_promotion": false
+}

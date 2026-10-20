@@ -1,0 +1,6 @@
+fallback_note: Wind字段在当前P0数据准备阶段作为兜底映射保留；本轮优先Tushare。
+required_later:
+  - rate_curve
+  - credit_rating_spreads
+  - cb_valuation
+  - macro_liquidity

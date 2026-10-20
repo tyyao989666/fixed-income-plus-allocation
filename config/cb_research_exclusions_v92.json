@@ -1,0 +1,13 @@
+{
+  "version": "v92",
+  "requested_on": "2026-10-20",
+  "excluded_securities": ["123015.SZ", "128100.SZ", "110072.SH"],
+  "names": ["蓝盾", "搜特", "广汇"],
+  "scope": "entire_historical_research_universe_before_basket_construction",
+  "authority": "explicit_user_request",
+  "retrospective_universe_selection": true,
+  "strict_no_lookahead_claim_allowed": false,
+  "raw_data_deletion_allowed": false,
+  "asset_structure": "preserve_38_assets_and_12_convertible_style_baskets",
+  "formal_training_allowed": false
+}

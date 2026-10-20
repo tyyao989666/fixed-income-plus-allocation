@@ -1,0 +1,85 @@
+version: event_driven_unified_target_ppo_v2
+base_config: config/integrated_daily_view_ppo_config.yaml
+profiles: [low_vol, balanced, high_vol]
+
+event:
+  prediction_horizons_days: [5, 20, 60]
+  action_names: [hold, adaptive_fused]
+  base_family:
+    low_vol: adaptive_fused
+    balanced: adaptive_fused
+    high_vol: adaptive_fused
+  allowed_families:
+    low_vol: [hold, adaptive_fused]
+    balanced: [hold, adaptive_fused]
+    high_vol: [hold, adaptive_fused]
+  mechanical_no_trade_l1:
+    low_vol: 0.003
+    balanced: 0.005
+    high_vol: 0.008
+  force_guardrails_on_hold: false
+  turnover_epsilon: 0.000001
+  reliability_temperature: 0.05
+  minimum_horizon_quality: 0.000001
+
+reward:
+  ewma_beta: 0.94
+  downside_penalty: 0.35
+  relative_volatility_penalty:
+    low_vol: 0.75
+    balanced: 0.50
+    high_vol: 0.20
+  relative_drawdown_penalty:
+    low_vol: 0.50
+    balanced: 0.35
+    high_vol: 0.15
+  active_deviation_penalty: 0.004
+  reward_scale: 100.0
+
+ppo:
+  seeds: [17, 29, 47]
+  hidden_dim: 64
+  learning_rate: 0.0005
+  max_epochs: 160
+  updates_per_epoch: 4
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_ratio: 0.15
+  value_loss_weight: 0.50
+  entropy_weight: 0.004
+  behavior_clone_epochs: 35
+  behavior_clone_class_balance_power: 1.00
+  teacher_stride: 1
+  minimum_teacher_edge: 0.002
+  validation_fraction: 0.20
+  min_train_rows: 120
+  evaluation_every: 10
+  early_stop_patience: 5
+  early_stopping_min_delta: 0.0001
+  minimum_policy_validation_reward: null
+  minimum_validation_edge_vs_fallback: 0.002
+  minimum_qualified_models: 2
+  ensemble_min_agreement: 2
+  minimum_action_probability: 0.35
+  minimum_probability_margin: 0.05
+
+gate:
+  evaluation_start: "2024-01-01"
+  min_sharpe_delta_vs_v6: 0.00
+  min_annual_return_delta_vs_v6: 0.00
+  max_drawdown_worsening_vs_v6: 0.005
+  require_variable_intervals: true
+
+outputs:
+  model_dir: data_processed/event_driven_rebalance_ppo_v2_models
+  daily_pattern: output/reports/event_driven_rebalance_ppo_v2_{profile}_daily.csv
+  decisions_pattern: data_processed/event_driven_rebalance_ppo_v2_{profile}_decisions.parquet
+  holdings_pattern: data_processed/event_driven_rebalance_ppo_v2_{profile}_asset_weights_daily.parquet
+  metrics_pattern: output/reports/event_driven_rebalance_ppo_v2_{profile}_metrics.csv
+  training_log_pattern: output/reports/event_driven_rebalance_ppo_v2_{profile}_training_log.csv
+  summary: output/reports/event_driven_rebalance_ppo_v2_three_profile_summary.csv
+  interval_summary: output/reports/event_driven_rebalance_ppo_v2_interval_summary.csv
+  audit_csv: output/reports/event_driven_rebalance_ppo_v2_point_in_time_audit.csv
+  gate_report: output/reports/event_driven_rebalance_ppo_v2_formal_gate.json
+  report_md: output/reports/event_driven_rebalance_ppo_v2_method_and_results.md
+  visual_png: output/reports/event_driven_rebalance_ppo_v2_dashboard.png

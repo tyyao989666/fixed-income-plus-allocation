@@ -1,0 +1,497 @@
+enabled: true
+version: v1_risk_budget_market_skill
+
+product:
+  selected_profile: balanced
+  profiles:
+    low_vol:
+      target_risk_contribution:
+        rates: 0.35
+        credit: 0.48
+        convertible_bonds: 0.01
+        equity: 0.01
+        alternatives: 0.15
+      sleeve_bounds:
+        rates: [0.34, 0.62]
+        credit: [0.32, 0.58]
+        convertible_bonds: [0.00, 0.03]
+        equity: [0.00, 0.02]
+        alternatives: [0.08, 0.18]
+        cash: [0.00, 0.00]
+      asset_overrides:
+        rates:
+          preferred_asset_weights:
+            rate_30y_curve_proxy: 0.52
+            rate_7_10y: 0.48
+        credit:
+          preferred_asset_weights:
+            credit_ind_aa_plus: 0.35
+            credit_ind_aa: 0.30
+            credit_lgfv_aa_plus: 0.25
+            credit_ind_aaa: 0.10
+        convertible_bonds:
+          preferred_asset_weights:
+            cb_balanced_large_high: 0.50
+            cb_balanced_small_low: 0.30
+            cb_bond_large_low: 0.10
+            cb_bond_small_low: 0.10
+        equity:
+          preferred_asset_weights:
+            equity_broad: 0.40
+            equity_dividend_utility: 0.35
+            equity_fin_property: 0.15
+            equity_manufacturing: 0.10
+        alternatives:
+          preferred_asset_weights:
+            alt_gold: 0.55
+            alt_commodity: 0.15
+            alt_nonferrous: 0.10
+            alt_chemical: 0.08
+            alt_us_bond: 0.07
+            alt_reits: 0.05
+      ep_skfolio_overrides:
+        risk_aversion: 1.30
+        base_deviation_penalty: 15.0
+        turnover_penalty: 0.55
+        max_active_deviation: 0.015
+        max_sleeve_turnover: 0.06
+      signal_overlay_overrides:
+        view_application:
+          direct_tilt_enabled: false
+          ep_mean_enabled: true
+          direct_tilt_scale: 1.00
+        trend_following:
+          tilt_per_score: 0.0275
+          max_sleeve_tilt: 0.06875
+    balanced:
+      target_risk_contribution:
+        rates: 0.28
+        credit: 0.32
+        convertible_bonds: 0.06
+        equity: 0.14
+        alternatives: 0.20
+      sleeve_bounds:
+        rates: [0.23, 0.53]
+        credit: [0.23, 0.47]
+        convertible_bonds: [0.03, 0.08]
+        equity: [0.06, 0.16]
+        alternatives: [0.10, 0.24]
+        cash: [0.00, 0.00]
+      asset_overrides:
+        rates:
+          preferred_asset_weights:
+            rate_30y_curve_proxy: 0.58
+            rate_7_10y: 0.42
+        credit:
+          preferred_asset_weights:
+            credit_ind_aa_plus: 0.35
+            credit_ind_aa: 0.30
+            credit_lgfv_aa_plus: 0.25
+            credit_ind_aaa: 0.10
+        convertible_bonds:
+          preferred_asset_weights:
+            cb_balanced_large_high: 0.50
+            cb_balanced_small_low: 0.30
+            cb_bond_large_low: 0.10
+            cb_bond_small_low: 0.10
+        equity:
+          preferred_asset_weights:
+            equity_broad: 0.30
+            equity_csi1000: 0.20
+            equity_chinext: 0.12
+            equity_dividend_utility: 0.15
+            equity_manufacturing: 0.08
+            equity_healthcare: 0.05
+            equity_consumption: 0.05
+            equity_fin_property: 0.03
+            equity_cyclical: 0.02
+        alternatives:
+          preferred_asset_weights:
+            alt_gold: 0.55
+            alt_commodity: 0.15
+            alt_nonferrous: 0.10
+            alt_chemical: 0.08
+            alt_us_bond: 0.07
+            alt_reits: 0.05
+      ep_skfolio_overrides:
+        risk_aversion: 1.10
+        base_deviation_penalty: 12.0
+        turnover_penalty: 0.45
+        max_active_deviation: 0.022
+        max_sleeve_turnover: 0.08
+      signal_overlay_overrides:
+        view_application:
+          direct_tilt_enabled: true
+          ep_mean_enabled: false
+          direct_tilt_scale: 0.50
+        trend_following:
+          tilt_per_score: 0.030
+          max_sleeve_tilt: 0.075
+    high_vol:
+      target_risk_contribution:
+        rates: 0.23
+        credit: 0.05
+        convertible_bonds: 0.05
+        equity: 0.30
+        alternatives: 0.37
+      sleeve_bounds:
+        rates: [0.19, 0.43]
+        credit: [0.03, 0.12]
+        convertible_bonds: [0.03, 0.10]
+        equity: [0.17, 0.35]
+        alternatives: [0.23, 0.41]
+        cash: [0.00, 0.00]
+      asset_overrides:
+        rates:
+          preferred_asset_weights:
+            rate_30y_curve_proxy: 0.60
+            rate_7_10y: 0.40
+        credit:
+          preferred_asset_weights:
+            credit_ind_aa_plus: 0.35
+            credit_ind_aa: 0.30
+            credit_lgfv_aa_plus: 0.25
+            credit_ind_aaa: 0.10
+        convertible_bonds:
+          preferred_asset_weights:
+            cb_balanced_large_high: 0.50
+            cb_balanced_small_low: 0.30
+            cb_bond_large_low: 0.10
+            cb_bond_small_low: 0.10
+        equity:
+          preferred_asset_weights:
+            equity_chinext: 0.34
+            equity_csi1000: 0.30
+            equity_broad: 0.17
+            equity_dividend_utility: 0.07
+            equity_manufacturing: 0.05
+            equity_fin_property: 0.02
+            equity_healthcare: 0.03
+            equity_consumption: 0.02
+        alternatives:
+          preferred_asset_weights:
+            alt_gold: 0.50
+            alt_commodity: 0.14
+            alt_nonferrous: 0.10
+            alt_chemical: 0.06
+            alt_us_bond: 0.12
+            alt_reits: 0.08
+      ep_skfolio_overrides:
+        risk_aversion: 0.90
+        base_deviation_penalty: 8.0
+        turnover_penalty: 0.34
+        max_active_deviation: 0.036
+        max_sleeve_turnover: 0.11
+      signal_overlay_overrides:
+        view_application:
+          direct_tilt_enabled: true
+          ep_mean_enabled: false
+          direct_tilt_scale: 1.00
+        trend_following:
+          tilt_per_score: 0.05625
+          max_sleeve_tilt: 0.1375
+rebalance:
+  frequency: monthly
+  signal_lag_periods: 1
+  start_date: "2018-01-31"
+  end_date: "2026-06-30"
+
+risk_budget:
+  sleeve_return_aggregation: preferred_asset_weights
+  lookback_months: 36
+  min_history_months: 12
+  covariance_shrinkage_to_diag: 0.20
+  max_iterations: 500
+  tolerance: 0.000001
+  diagonal_vol_floor: 0.002
+
+ep_skfolio:
+  enabled: true
+  backend: skfolio_meanrisk_clarabel
+  solver: CLARABEL
+  mu_lookback_months: 12
+  prior_mu_shrinkage: 0.65
+  view_mode: mean_rank
+  view_rank_center: true
+  view_risk_adjustment_enabled: false
+  view_mu_scale: 0.004
+  trend_lookback_months: [3, 6, 12]
+  trend_mu_scale: 0.18
+  itransformer_mu_scale: 0.35
+  max_abs_mu_tilt: 0.010
+  cov_lookback_months: 36
+  min_history_months: 12
+  covariance_shrinkage_to_diag: 0.20
+  covariance_estimator:
+    method: sample_shrink
+    shrinkage_to_diag: 0.20
+    note: "sample_shrink keeps the historical v1 behaviour. Alternative methods: ewma_shrink, rienet_inspired."
+    ewma:
+      half_life_months: 12
+    rienet_cleaner:
+      half_life_months: 18
+      winsorize_z: 4.0
+      eigen_shrinkage: 0.45
+      vol_shrinkage_to_median: 0.20
+      max_condition_number: 25.0
+      min_eigenvalue: 0.0001
+  risk_aversion: 1.15
+  base_deviation_penalty: 12.0
+  turnover_penalty: 0.45
+  max_active_deviation: 0.020
+  max_sleeve_turnover: 0.08
+  cov_jitter: 0.0000001
+  max_iterations: 300
+  tolerance: 0.000000001
+  note: EP将MarketSkill/Agentic views作为后验均值排序信号，不作为风险/协方差视图；趋势和iTransformer预测同样只进入袖套后验收益，skfolio MeanRisk优化器在大类上下限、偏离overlay和换手约束下落袖套权重。
+
+strategy_version_overrides:
+  agentic:
+    note: "Agentic views use compressed single-call LangGraph outputs. Keep low_vol conservative; mildly strengthen balanced/high_vol view impact based on scripts/83_search_agentic_ep_params.py."
+    profiles:
+      balanced:
+        ep_skfolio:
+          view_mu_scale: 0.006
+          max_active_deviation: 0.025
+          max_abs_mu_tilt: 0.012
+        view_tilt_profile_scale:
+          balanced: 0.75
+      high_vol:
+        ep_skfolio:
+          view_mu_scale: 0.006
+          max_active_deviation: 0.025
+          max_abs_mu_tilt: 0.012
+        view_tilt_profile_scale:
+          high_vol: 0.40
+
+signal_overlays:
+  view_application:
+    direct_tilt_enabled: true
+    ep_mean_enabled: true
+    direct_tilt_scale: 1.00
+    note: "Keeps the two Market View transmission channels explicit so direct sleeve tilts and EP posterior-mean views can be ablated independently."
+  view_preprocessing:
+    mode: monthly_pair_mean
+    recent_days: 5
+    persistence_power: 0.50
+    note: "Controls which already-observed daily Market Views enter each month-end rebalance. Candidate modes are selected only on 2018-2024; portfolio execution remains lagged by one month."
+  view_reliability:
+    enabled: false
+    group_by: sleeve_direction
+    lookback_months: 36
+    min_observations: 8
+    prior_strength: 8.0
+    sensitivity: 1.0
+    minimum_factor: 0.50
+    maximum_factor: 1.35
+    confidence_weighted: true
+    only_downweight: false
+    confidence_cap: 1.0
+    note: "Causal Beta-shrunk hit-rate calibration. Only outcomes fully realized by the decision month may scale current relative-view confidence."
+  rule_output:
+    enabled: true
+    state_cards_path: data_processed/market_state_cards_daily_v1.parquet
+    apply_adjust_speed: false
+    adjust_speed_map:
+      slow_30_to_45pct: 0.40
+      normal_60pct: 0.60
+    apply_alt_internal_overlay: false
+    alt_overlay_strength: 0.15
+    alt_state_weights:
+      ALT1:
+        alt_gold: 0.62
+        alt_us_bond: 0.18
+        alt_reits: 0.10
+        alt_commodity: 0.04
+        alt_nonferrous: 0.03
+        alt_chemical: 0.03
+      ALT3:
+        alt_gold: 0.20
+        alt_us_bond: 0.05
+        alt_reits: 0.05
+        alt_commodity: 0.30
+        alt_nonferrous: 0.22
+        alt_chemical: 0.18
+      ALT4:
+        alt_gold: 0.36
+        alt_us_bond: 0.18
+        alt_reits: 0.28
+        alt_commodity: 0.08
+        alt_nonferrous: 0.05
+        alt_chemical: 0.05
+    note: rule_output_object当前作为状态审计和Agent输入；调仓速度与ALT内部overlay已实测但正式关闭，不改变五大袖套总风险预算。
+  asset_itransformer:
+    enabled: false
+    predictions_path: data_processed/asset_itransformer_predictions_monthly.parquet
+    blend: 0.80
+    temperature: 0.035
+    min_assets: 2
+    max_asset_share: 0.75
+    enabled_modules: [credit, convertible_bonds, equity]
+    note: 资产级iTransformer样本外RankIC接近0，正式链路暂时关闭；待Point-in-Time滚动训练通过门控后再启用。
+  itransformer_rank:
+    enabled: false
+    direct_tilt_enabled: true
+    ep_mean_enabled: false
+    validation_gate:
+      status: shadow_rejected_nested_walkforward
+      formal_gate_passed: false
+      reason: nested_walkforward_development_failure
+      cv_rank_ic_2022_2023_2024: [-0.01228, 0.18276, -0.13220]
+      cv_median_rank_ic: -0.01228
+      cv_min_rank_ic: -0.13220
+      baseline_cv_median_rank_ic: 0.08103
+      incremental_cv_rank_ic: -0.09332
+      adaptive_holdout_rank_ic: 0.11096
+      preprocessing_version: daily_timing_v2_identified_multihorizon
+    predictions_path: data_processed/itransformer_daily_timing_v2_monthly_oos.parquet
+    gate_report_path: output/reports/itransformer_daily_timing_v2_formal_gate.json
+    require_live_gate: true
+    enabled_profiles: [balanced]
+    top_n: 1
+    bottom_n: 1
+    tilt: 0.015
+    min_top_prob: 0.0
+    note: V2使用正式balanced资产锚、5/20/60日风险调整相对收益、嵌套walk-forward、变量身份embedding与袖套query；直接倾斜门控未通过，因此本通道关闭。V2 OOS分数只进入独立受约束PPO控制层，不进入EP posterior mean，避免双重计数。
+  trend_following:
+    enabled: true
+    enabled_profiles: [low_vol, balanced, high_vol]
+    lookback_months: [3, 6, 12]
+    tilt_per_score: 0.034
+    max_sleeve_tilt: 0.090
+    negative_threshold: 0.0
+    positive_threshold: 0.0
+    source_sleeves: [convertible_bonds, equity, alternatives]
+    receiver_sleeves: [rates, credit]
+    note: 基于已实现月度收益的3/6/12月绝对趋势风险刹车；风险袖套趋势转负时只向利率和信用小幅再分配，受产品上下限约束，不使用现金，不替代风险预算。
+  risk_on_rotation:
+    enabled: false
+    enabled_profiles: [low_vol, balanced, high_vol]
+    lookback_months: [6, 12]
+    require_all_lookbacks_positive: true
+    positive_threshold: 0.0
+    donor_sleeves: [rates, credit]
+    receiver_sleeves: [equity, alternatives]
+    top_n: 1
+    momentum_scale: 0.10
+    profile_max_tilt:
+      low_vol: 0.00
+      balanced: 0.02
+      high_vol: 0.05
+    note: 因果风险进攻轮动实验；仅当风险袖套6月和12月趋势同时为正时，才从利率/信用向最强风险袖套增配。正式启用前必须通过开发期消融。
+  agentic_asset_views:
+    enabled: true
+    enabled_profiles: [high_vol]
+    enabled_modules: [rates, credit, convertible_bonds, equity, alternatives]
+    min_confidence: 0.50
+    tilt_per_confidence: 0.10
+    max_pair_transfer: 0.10
+    max_asset_share: 0.75
+    note: 使用Agentic/MarketSkill输出的同袖套资产级relative views做袖套内部再分配；当前只对high_vol启用，因为低波/中波测试显示换手上升且夏普受损；不改变袖套总权重，不允许现金，不允许跨袖套直接落仓位。
+
+  asset_covariance_cleaner:
+    enabled: false
+    enabled_profiles: [low_vol, balanced, high_vol]
+    enabled_modules: [rates, credit, convertible_bonds, equity, alternatives]
+    lookback_months: 36
+    min_history_months: 12
+    min_assets: 2
+    blend: 0.35
+    max_asset_share: 0.75
+    diagonal_vol_floor: 0.002
+    cov_jitter: 0.00000001
+    covariance_estimator:
+      method: rienet_inspired
+      rienet_cleaner:
+        half_life_months: 18
+        winsorize_z: 4.0
+        eigen_shrinkage: 0.45
+        vol_shrinkage_to_median: 0.20
+        max_condition_number: 25.0
+        min_eigenvalue: 0.0001
+    note: "Asset-level RIEnet-inspired covariance cleaner. It changes only within-sleeve asset shares, not sleeve budgets or EP views."
+  asset_momentum:
+    enabled: true
+    enabled_profiles: [low_vol, balanced, high_vol]
+    enabled_modules: [equity, alternatives]
+    lookback_months: [6, 12]
+    min_history_months: 12
+    min_assets: 2
+    score_method: raw_momentum
+    rank_concentration: 2.0
+    negative_momentum_threshold: 0.0
+    negative_momentum_multiplier: 0.50
+    profile_blend:
+      low_vol: 0.06
+      balanced: 0.22
+      high_vol: 0.38
+    max_asset_share: 0.75
+    volatility_floor: 0.02
+    note: "Causal within-sleeve relative momentum. Month-end data form target shares for next-month execution; sleeve totals and product bounds do not change."
+
+data_cleaning:
+  max_abs_monthly_return: 0.80
+  nonfinite_policy: set_missing
+
+synthetic_assets:
+  rate_30y_curve_proxy:
+    enabled: true
+    asset_code: rate_30y_curve_proxy
+    asset_name: 30Y国债曲线代理
+    yield_column: treasury_y30
+    modified_duration: 18.5
+    base_close: 100.0
+    note: 由中债30Y国债收益率曲线合成的恒定久期代理产品，不是ETF实盘价格。
+
+view_tilts:
+  credit: 0.03
+  rates_long_duration: 0.03
+  convertible_bonds: 0.02
+  equity: 0.025
+  gold: 0.015
+
+view_tilt_profile_scale:
+  low_vol: 0.50
+  balanced: 0.50
+  high_vol: 0.35
+
+asset_mapping:
+  rates_long_duration:
+    module: rates
+    preferred_assets: [rate_30y_curve_proxy, rate_7_10y]
+    preferred_asset_weights:
+      rate_30y_curve_proxy: 0.62
+      rate_7_10y: 0.38
+  alternative_basket:
+    module: alternatives
+    preferred_assets: [alt_gold, alt_commodity, alt_nonferrous, alt_chemical, alt_us_bond, alt_reits]
+    preferred_asset_weights:
+      alt_gold: 0.55
+      alt_commodity: 0.15
+      alt_nonferrous: 0.10
+      alt_chemical: 0.08
+      alt_us_bond: 0.07
+      alt_reits: 0.05
+  gold:
+    module: alternatives
+    preferred_assets: [alt_gold]
+  alternatives:
+    module: alternatives
+  cash:
+    module: cash
+
+costs:
+  transaction_cost_bps: 5
+
+outputs:
+  weights: data_processed/v1_target_weights_monthly.parquet
+  sleeve_weights: data_processed/v1_sleeve_weights_monthly.parquet
+  risk_budget_base: data_processed/v1_risk_budget_base_monthly.parquet
+  nav: output/reports/v1_backtest_nav.csv
+  metrics: output/reports/v1_backtest_metrics.csv
+  attribution: output/reports/v1_attribution_by_sleeve.csv
+  robustness: output/reports/v1_robustness_summary.csv
+  data_quality: output/reports/v1_data_quality.csv
+  ep_posterior: data_processed/v1_ep_posterior_monthly.parquet
+  ep_signals: output/reports/v1_ep_signals.csv
+  optimizer_diagnostics: output/reports/v1_optimizer_diagnostics.csv

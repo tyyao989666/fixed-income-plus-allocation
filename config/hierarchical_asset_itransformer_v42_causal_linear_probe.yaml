@@ -1,0 +1,139 @@
+base_config: hierarchical_asset_itransformer_v41_multiseed_stability.yaml
+version: hierarchical_asset_itransformer_v42_causal_linear_probe
+
+# The nonlinear iTransformer is retained as the point-in-time representation
+# learner.  A deterministic, strongly regularized linear probe replaces the
+# unstable end-to-end neural mean head.  PPO remains an execution controller;
+# it cannot create directions, assets, horizons, or a second target portfolio.
+model:
+  seeds: [17, 29, 47]
+  max_epochs: 1000
+  self_supervised_pretraining:
+    enabled: true
+    # Most corruptions hide only the recent causal suffix (1/5/20 trading days),
+    # forcing the representation to encode state changes rather than memorising
+    # static asset identity. Full-path masks remain as a smaller imputation task.
+    mask_mode: mixed_causal_suffix
+    full_path_mask_fraction: 0.25
+    causal_suffix_days: [1, 5, 20]
+    # A prior year's encoder has seen only earlier observations. Reuse it only
+    # when both the representation architecture and training schedule match.
+    warm_start_from_previous_year: true
+    max_epochs: 1000
+    minimum_epochs: 100
+    patience: 40
+    # Ignore tiny reconstruction fluctuations. The model can train up to 1,000
+    # epochs, but must earn another patience window with a material validation
+    # improvement to continue.
+    min_delta: 0.003
+    freeze_encoder_epochs: 1000
+    progress_every_epochs: 10
+
+  causal_linear_probe:
+    enabled: true
+    target: relative_mean_return
+    deployment_target: dynamic_relative_mean_innovation
+    remove_entity_fixed_effect: true
+    center_entity_representation: true
+    solver: lsqr
+    alpha_per_training_cell: 0.30
+    minimum_training_cells: 120
+    equal_date_weighting: true
+    prediction_clip: 0.60
+    ensemble: equal_seed_mean
+    # The gate uses only the purged train-only fit and pre-year validation block.
+    # Once that decision is frozen, refit the deterministic probe on all labels
+    # that had matured before the OOS year starts.
+    final_refit_after_validation: true
+
+    # This validation block is before the prediction year and is purged by the
+    # 60-day label boundary.  It is used only as a causal deployment gate.
+    # A single pre-year validation can be a false positive (as the 2022 rates
+    # diagnostic demonstrated).  Early years remain shadow-only while their
+    # raw forecasts accrue; a component may affect capital only after the
+    # configured multi-year matured-OOS gate becomes available.
+    asset_initial_gate_enabled: false
+    sleeve_initial_gate_enabled: false
+    minimum_validation_rank_ic:
+      asset: 0.10
+      sleeve: 0.12
+    minimum_seed_positive_fraction:
+      asset: 1.00
+      sleeve: 1.00
+    minimum_seed_prediction_agreement:
+      asset: 0.50
+      sleeve: 0.65
+    minimum_positive_block_fraction:
+      asset: 0.60
+      sleeve: 0.67
+    validation_block_days_minimum: 20
+
+    # Once genuinely issued forecasts have matured, prior walk-forward OOS
+    # evidence is required as well.  No later year rewrites an earlier view.
+    prior_oos_gate_enabled: true
+    prior_oos_minimum_years: 2
+    prior_oos_minimum_rank_ic:
+      asset: 0.04
+      sleeve: 0.05
+    prior_oos_minimum_positive_year_fraction: 0.50
+
+walk_forward:
+  # A stable, one-year pre-OOS validation period keeps yearly gates comparable.
+  # Train labels are still purged by the longest (60-day) forecast horizon.
+  validation_window_days: 252
+
+controller:
+  # PPO is not allowed to manufacture a strategy when every learned mean view
+  # has fallen back to exact zero.
+  enabled_only_after_forecast_gate: true
+  teacher_guidance:
+    # Historical five-day, cost-aware execution labels are built only from
+    # fully mature observations inside each controller train split. They give
+    # PPO a denser timing objective before on-policy fine tuning; no teacher
+    # label or realised return is available at decision time.
+    enabled: true
+    horizon_days: 5
+    pretrain_epochs: 30
+    policy_loss_weight: 0.15
+
+portfolio:
+  # Strategic asset selection must use only horizons that independently passed
+  # their causal gates. These fixed role weights are set before evaluation,
+  # rather than selected from realised portfolio returns. A horizon is a view
+  # timescale, not a fixed rebalance frequency; PPO retains daily execution.
+  asset_score_horizon_weights:
+    5: 0.15
+    20: 0.50
+    60: 0.35
+  bootstrap:
+    # Return has to be strongly positive under dependent-resampling. Sharpe is
+    # a noisier ratio, so its gate requires a positive majority and reports a
+    # 90% interval instead of pretending the point estimate is certain.
+    draws: 3000
+    block_days: 20
+    seed: 20260727
+    minimum_return_positive_probability: 0.80
+    minimum_sharpe_positive_probability: 0.60
+
+outputs:
+  model_dir: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_models
+  controller_model_dir: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_controller_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v42_causal_linear_probe_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_point_in_time_audit.csv
+  bootstrap_report: output/reports/hierarchical_asset_itransformer_v42_causal_linear_probe_bootstrap_robustness.csv

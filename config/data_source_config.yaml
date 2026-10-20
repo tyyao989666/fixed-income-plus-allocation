@@ -1,0 +1,25 @@
+priority:
+  - tushare
+  - wind
+  - local_cache
+
+required_columns:
+  asset_returns_daily:
+    - date
+    - code
+    - asset_name
+    - module
+    - close
+    - return
+    - data_source
+
+tushare:
+  token_sources:
+    - tushare_local_token
+    - env:TUSHARE_TOKEN
+  cache_dir: data_raw/tushare
+
+wind:
+  enabled: true
+  cache_dir: data_raw/wind
+  unavailable_policy: mark_missing_source

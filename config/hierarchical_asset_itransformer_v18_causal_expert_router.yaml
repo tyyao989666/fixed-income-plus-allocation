@@ -1,0 +1,59 @@
+base_config: hierarchical_asset_itransformer_v17_adaptive_experts.yaml
+version: hierarchical_asset_itransformer_v18_causal_expert_router
+
+model:
+  # The iTransformer may re-route at most 80% of the fixed baseline toward
+  # causal experts. Initial temperature leaves enough gradient to learn.
+  expert_initial_baseline_probability: 0.90
+  expert_adaptation_scale: 0.80
+  expert_gate_temperature: 1.50
+  expert_gate_deviation_weight: 0.03
+  expert_routing_loss_weight: 0.45
+  expert_oracle_temperature: 0.20
+  batch_size: 192
+  learning_rate: 0.000075
+  minimum_epochs: 20
+  patience: 30
+  checkpoint_selection_mode: rank_constrained
+  checkpoint_rank_loss_relative_tolerance: 0.20
+  checkpoint_rank_min_score: 0.05
+  checkpoint_average_top_k: 3
+  checkpoint_rank_reward: 0.75
+  asset_loss_weight: 0.10
+  sleeve_loss_weight: 0.15
+  asset_pairwise_loss_weight: 0.70
+  sleeve_pairwise_loss_weight: 0.90
+  listwise_rank_loss_weight: 0.35
+
+  # A model is promoted only from already-realized annual walk-forward
+  # forecasts. The current validation block may select a checkpoint, never
+  # the final model/baseline mixing coefficient.
+  blend_selection_source: prior_walkforward_oos
+  blend_min_calibration_years: 2
+  blend_min_rank_ic_improvement: 0.010
+  blend_min_full_rank_ic_improvement: 0.005
+  blend_min_positive_subgroup_fraction: 0.65
+
+outputs:
+  dataset_npz: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_dataset.npz
+  metadata: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_metadata.json
+  label_diagnostics: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_label_diagnostics.csv
+  model_dir: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v18_causal_expert_router_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v18_causal_expert_router_point_in_time_audit.csv

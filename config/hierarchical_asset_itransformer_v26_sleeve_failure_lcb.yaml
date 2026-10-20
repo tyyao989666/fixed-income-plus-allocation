@@ -1,0 +1,74 @@
+base_config: hierarchical_asset_itransformer_v25_forward_skill_router.yaml
+version: hierarchical_asset_itransformer_v26_sleeve_failure_lcb
+
+data:
+  # The target is an expected candidate-minus-anchor rank-IC edge over the
+  # forward issue window. One weighted standard error is removed before the
+  # target becomes eligible, and the final label maturity is retained.
+  forward_expert_skill_target:
+    window_days: 20
+    minimum_observations: 12
+    halflife_days: 10
+    clip: 1.0
+    uncertainty_penalty: 1.0
+
+model:
+  # Asset-level momentum is already the strongest repeatable expert in the
+  # current universe. Keep it fixed while the model learns when the five-sleeve
+  # anchor fails. The 38 asset histories and cards remain encoder inputs.
+  asset_expert_adaptation_scale: 0.0
+  sleeve_expert_adaptation_scale: 0.55
+
+  # Continuous target: the non-baseline weight grows with the conservative
+  # lower-confidence edge instead of switching to a hindsight winner.
+  expert_oracle_source: forward_smoothed_edge
+  expert_oracle_mode: continuous_abstaining
+  expert_oracle_minimum_edge: 0.02
+  expert_oracle_activation_edge_scale: 0.20
+  expert_oracle_maximum_nonbaseline_weight: 0.35
+  expert_oracle_temperature: 0.10
+  expert_oracle_label_smoothing: 0.01
+
+  # Do not train a dormant asset router. Sleeve routing is the only supervised
+  # expert-deviation task in this version.
+  expert_routing_loss_weight: 0.0
+  asset_expert_routing_loss_weight: 0.0
+  sleeve_expert_routing_loss_weight: 0.50
+  expert_gate_deviation_weight: 0.12
+
+  # The masked encoder is first held fixed, then only gently fine-tuned. The
+  # ceiling remains 1000 epochs, with validation-based stopping and checkpoint
+  # averaging preventing a late overfit checkpoint from being deployed.
+  learning_rate: 0.000025
+  weight_decay: 0.030
+  minimum_epochs: 80
+  patience: 120
+  validation_every_epochs: 10
+  self_supervised_pretraining:
+    freeze_encoder_epochs: 60
+
+outputs:
+  dataset_npz: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_dataset.npz
+  metadata: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_metadata.json
+  label_diagnostics: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_label_diagnostics.csv
+  model_dir: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_gate.json
+  expert_library_audit: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_expert_library_audit.csv
+  expert_usage: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_expert_usage.csv
+  report_md: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v26_sleeve_failure_lcb_point_in_time_audit.csv

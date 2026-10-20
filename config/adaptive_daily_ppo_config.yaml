@@ -1,0 +1,72 @@
+version: daily_residual_itransformer_64d_2l_4h_adaptive_ppo_v2
+profiles: [low_vol, balanced, high_vol]
+
+data:
+  predictions: data_processed/itransformer_daily_timing_v2_residual_predictions.parquet
+  state_cards: data_processed/market_state_cards_daily_v1.parquet
+  asset_returns: data_processed/asset_returns_daily.parquet
+  asset_weights_pattern: data_processed/v1_{profile}_target_weights_monthly.parquet
+  sleeve_weights_pattern: data_processed/v1_{profile}_sleeve_weights_monthly.parquet
+  start_date: "2022-01-01"
+  reliability_window: 60
+  minimum_model_weight: 0.10
+  maximum_model_weight: 0.65
+  model_reliability_scale: 0.90
+  model_edge_scale: 0.90
+
+actions:
+  horizons_days: [5, 20, 60]
+  names: [noop, follow_25, follow_50, follow_100, reverse_25, reverse_50]
+  levels: [0.00, 0.25, 0.50, 1.00, -0.25, -0.50]
+  min_score_spread: 0.05
+  minimum_reliability_for_active: 0.02
+  max_pair_transfer:
+    low_vol: 0.005
+    balanced: 0.010
+    high_vol: 0.020
+
+reward:
+  transaction_cost_bps: 5.0
+  downside_penalty: 0.20
+  active_deviation_penalty: 0.002
+  reward_scale: 100.0
+
+ppo:
+  seeds: [17, 29, 47]
+  hidden_dim: 64
+  learning_rate: 0.0005
+  max_epochs: 160
+  updates_per_epoch: 4
+  gamma: 0.98
+  gae_lambda: 0.90
+  clip_ratio: 0.15
+  value_loss_weight: 0.50
+  entropy_weight: 0.005
+  behavior_clone_epochs: 40
+  minimum_teacher_edge: 0.02
+  validation_fraction: 0.20
+  min_train_rows: 120
+  evaluation_every: 10
+  early_stop_patience: 5
+  early_stopping_min_delta: 0.0001
+  ensemble_min_agreement: 2
+  minimum_policy_validation_reward: 0.005
+  minimum_qualified_models: 2
+
+gate:
+  evaluation_start: "2024-01-01"
+  min_sharpe_delta: 0.0
+  min_annual_return_delta: 0.0
+  max_drawdown_worsening: 0.005
+  min_active_decisions: 3
+
+outputs:
+  model_dir: data_processed/adaptive_daily_ppo_models
+  daily_pattern: output/reports/adaptive_daily_ppo_{profile}_daily.csv
+  decisions_pattern: data_processed/adaptive_daily_ppo_{profile}_decisions.parquet
+  metrics_pattern: output/reports/adaptive_daily_ppo_{profile}_metrics.csv
+  training_log_pattern: output/reports/adaptive_daily_ppo_{profile}_training_log.csv
+  summary: output/reports/adaptive_daily_ppo_three_profile_summary.csv
+  audit_csv: output/reports/adaptive_daily_ppo_point_in_time_audit.csv
+  gate_report: output/reports/adaptive_daily_ppo_formal_gate.json
+  report_md: output/reports/adaptive_daily_ppo_method_and_results.md

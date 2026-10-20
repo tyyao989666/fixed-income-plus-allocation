@@ -1,0 +1,3 @@
+min_listing_days: 20
+exclude_suspended: true
+max_bonds_for_initial_download: 260

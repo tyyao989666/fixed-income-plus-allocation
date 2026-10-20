@@ -1,0 +1,35 @@
+base_config: hierarchical_asset_itransformer_v32_rank_gated_mean.yaml
+version: hierarchical_asset_itransformer_v33_multihorizon_mean
+
+model:
+  # Five-day and twenty-day targets are auxiliary supervision. The portfolio
+  # may use a horizon only after that horizon independently passes the causal
+  # prior-OOS gate.
+  asset_horizon_loss_weights: [0.10, 0.35, 0.55]
+  sleeve_horizon_loss_weights: [0.10, 0.40, 0.50]
+  validation_asset_horizon_weights: [0.10, 0.35, 0.55]
+  validation_sleeve_horizon_weights: [0.10, 0.40, 0.50]
+  asset_enabled_horizons_days: [5, 20, 60]
+  sleeve_enabled_horizons_days: [5, 20, 60]
+
+outputs:
+  model_dir: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_models
+  controller_model_dir: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_controller_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v33_multihorizon_mean_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v33_multihorizon_mean_point_in_time_audit.csv

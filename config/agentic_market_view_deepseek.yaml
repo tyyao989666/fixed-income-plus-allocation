@@ -1,0 +1,65 @@
+enabled: true
+version: agentic_market_view_v1_deepseek_flash
+frequency: month_end
+max_views_per_date: 5
+confidence_min: 0.45
+confidence_max: 0.75
+max_revision_rounds: 1
+fallback_to_mechanical: true
+parallel_experts: false
+date_workers: 1
+request_retry_attempts: 3
+request_retry_base_seconds: 3.0
+compressed_request_delay_seconds: 8.0
+
+agentic_enhancement:
+  evidence_confidence_formula: true
+  mechanical_audit_calibration: true
+  agree_confidence_boost: 0.03
+  raise_confidence_boost: 0.06
+  lower_confidence_penalty: 0.06
+  new_override_min_confidence: 0.58
+  max_calibrated_views: 3
+
+model:
+  provider: deepseek
+  model: deepseek-v4-flash
+  base_url: https://api.deepseek.com
+  api_key_env: DEEPSEEK_API_KEY
+  temperature: 0.1
+  max_tokens: 5000
+  response_format_json: true
+  timeout_seconds: 120
+
+experts:
+  rates_fiscal:
+    enabled: true
+    label: "利率、财政与流动性"
+    skill_sources: ["财政政策skill", "interest-rate-derivatives"]
+  credit:
+    enabled: true
+    label: "信用策略"
+    skill_sources: ["credit-strategy-weekly"]
+  equity_cb:
+    enabled: true
+    label: "权益与可转债"
+    skill_sources: ["us-equity-analysis"]
+  gold:
+    enabled: true
+    label: "黄金"
+    skill_sources: ["gold-skill"]
+  fx_us_macro:
+    enabled: true
+    label: "汇率与美国宏观"
+    skill_sources: ["FX SKILL", "us-macro-handbook"]
+  ust:
+    enabled: true
+    label: "美债与全球利率"
+    skill_sources: ["ust-framework"]
+
+paths:
+  agentic_views: data_processed/market_skill_views_agentic_daily_v1.parquet
+  agentic_ep_views: data_processed/ep_views_agentic_daily_v1.parquet
+  audit_jsonl: output/reports/agentic_market_view_audit.jsonl
+  raw_responses: output/reports/agentic_market_view_raw_responses.csv
+  report: output/reports/agentic_market_view_report.md

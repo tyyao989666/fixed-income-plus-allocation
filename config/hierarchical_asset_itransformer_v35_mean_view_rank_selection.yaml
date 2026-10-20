@@ -1,0 +1,50 @@
+base_config: hierarchical_asset_itransformer_v33_multihorizon_mean.yaml
+version: hierarchical_asset_itransformer_v35_mean_view_rank_selection
+
+model:
+  # The neural network estimates conditional relative means. Checkpoint
+  # selection must therefore score the same cross-sectional mean views that
+  # are later consumed by EP/skfolio, without a synthetic rebalance or cost
+  # model inside the forecaster.
+  validation_selection_metric: mean_view_rank
+  component_checkpoint_selection_metric: mean_view_rank
+  validation_asset_increment_weight: 0.50
+  validation_sleeve_increment_weight: 0.50
+  validation_mean_rank_downside_weight: 0.10
+  validation_mean_rank_positive_reward: 0.00
+
+  # Rank-constrained selection still requires a reasonably calibrated mean
+  # loss, but it must not silently fall back to minimum loss merely because an
+  # inherited absolute score floor was tuned for another objective.
+  checkpoint_rank_min_score: -1.00
+  checkpoint_rank_loss_relative_tolerance: 0.20
+
+walk_forward:
+  # All learning-target ablations use the same conservative sample boundary:
+  # a row enters a fold only after its 60-day label is fully observable. This
+  # prevents a short-horizon experiment from receiving a later and larger
+  # training/validation sample than a strategic-horizon experiment.
+  split_horizons_days: [60]
+  require_all_split_horizons_mature: true
+
+outputs:
+  model_dir: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_models
+  controller_model_dir: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_controller_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v35_mean_view_rank_selection_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v35_mean_view_rank_selection_point_in_time_audit.csv

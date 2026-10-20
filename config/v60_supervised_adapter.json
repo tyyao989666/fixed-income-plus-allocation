@@ -1,0 +1,21 @@
+{
+  "version": "v60_paired_last_block_supervised_adapter",
+  "years": [2022, 2023],
+  "encoder_seed": 17,
+  "training_seeds": [17, 29, 47],
+  "modes": ["frozen_control", "last_block_adapter"],
+  "maximum_epochs": 1000,
+  "minimum_epochs": 50,
+  "patience_epochs": 40,
+  "validation_every": 5,
+  "batch_size": 96,
+  "head_lr": 0.0002,
+  "encoder_lr": 0.00001,
+  "weight_decay": 0.04,
+  "prior_shrinkage_days": 126,
+  "residual_bound_shared_sigma": 1.0,
+  "rank_weight": 0.05,
+  "residual_penalty": 0.01,
+  "minimum_mean_MSE_improvement": 0.02,
+  "formal_promotion": false
+}

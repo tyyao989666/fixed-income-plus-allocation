@@ -1,0 +1,69 @@
+enabled: true
+version: v3_itransformer_signal_pit
+
+data:
+  start_date: "2018-01-31"
+  train_end: "2022-12-31"
+  val_end: "2023-12-31"
+  prediction_start: "2022-01-31"
+  horizon_months: 1
+  sequence_length: 12
+  target_sleeves: [rates, credit, convertible_bonds, equity, alternatives]
+  feature_prefixes:
+    - rate_
+    - credit_
+    - funding_
+    - cb_
+    - equity_
+    - alt_
+  max_features: 64
+  preprocessing:
+    method: causal_rolling_robust
+    window: 36
+    min_periods: 12
+    clip: 5.0
+    include_availability_flags: true
+    availability_flag_min_missing_rate: 0.01
+
+synthetic_assets:
+  rate_30y_curve_proxy:
+    enabled: true
+    asset_code: rate_30y_curve_proxy
+    asset_name: 30Y国债曲线代理
+    yield_column: treasury_y30
+    modified_duration: 18.5
+    base_close: 100.0
+
+model:
+  d_model: 64
+  n_heads: 4
+  num_layers: 2
+  dropout: 0.10
+  probability_temperature: 0.03
+  epochs: 300
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  patience: 12
+  seed: 42
+
+experiment:
+  seeds: [7, 13, 42, 101, 202]
+
+outputs:
+  dataset: data_processed/itransformer_dataset_monthly.parquet
+  metadata: output/reports/itransformer_dataset_metadata.json
+  baseline_predictions: data_processed/baseline_predictions_monthly.parquet
+  baseline_report: output/reports/baseline_prediction_report.csv
+  predictions: data_processed/itransformer_predictions_monthly.parquet
+  validation_report: output/reports/itransformer_validation_report.csv
+  training_log: output/reports/itransformer_training_log.csv
+  model: data_processed/itransformer_signal_model.pt
+  multiseed_report: output/reports/itransformer_multiseed_report.csv
+  multiseed_summary: output/reports/itransformer_multiseed_summary.csv
+  visual_report: output/reports/itransformer_signal_report.html
+  asset_dataset: data_processed/asset_itransformer_dataset_monthly.parquet
+  asset_metadata: output/reports/asset_itransformer_dataset_metadata.json
+  asset_predictions: data_processed/asset_itransformer_predictions_monthly.parquet
+  asset_validation_report: output/reports/asset_itransformer_validation_report.csv
+  asset_training_log: output/reports/asset_itransformer_training_log.csv
+  asset_model: data_processed/asset_itransformer_signal_model.pt

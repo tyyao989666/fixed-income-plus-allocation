@@ -1,0 +1,251 @@
+version: v80_box_first_research_contract
+status: research_only_not_promoted
+priorities:
+- source_and_visibility
+- long_only_no_borrowing
+- target_product_bounds
+- execution_and_cash_availability
+- risk_budget_soft_fit
+target_sum: 1.0
+target_cash_weight: 0.0
+cost_per_gross_traded_notional: 0.0005
+signal_execution: strictly_next_domestic_session_close_not_same_day
+risk_budget_exact_required: false
+actual_rc_and_error_disclosure_required: true
+realized_risk_ordering_guaranteed: false
+blocked_execution_policy: keep_inventory_flag_breach_do_not_fake_compliant_fill
+settlement_cash_policy: not_an_allocatable_risk_sleeve_no_automatic_borrowing_against_receivables
+baseline_classic_erc: separate_unbounded_reference_not_a_box_compliant_product
+assets: 38
+nine_grid_preserved: true
+models:
+- iTransformer_relative_views
+- PPO_adaptive_execution
+training_allowed: false
+training_blockers:
+- cashflow_and_inventory_certification
+- same_basis_mechanical_baselines
+formal_promotion: false
+profiles:
+  low_vol:
+    target_risk_contribution:
+      rates: 0.35
+      credit: 0.48
+      convertible_bonds: 0.01
+      equity: 0.01
+      alternatives: 0.15
+    sleeve_bounds:
+      rates:
+      - 0.34
+      - 0.62
+      credit:
+      - 0.32
+      - 0.58
+      convertible_bonds:
+      - 0.0
+      - 0.03
+      equity:
+      - 0.0
+      - 0.02
+      alternatives:
+      - 0.08
+      - 0.18
+      cash:
+      - 0.0
+      - 0.0
+    asset_overrides:
+      rates:
+        preferred_asset_weights:
+          rate_30y_curve_proxy: 0.52
+          rate_7_10y: 0.48
+      credit:
+        preferred_asset_weights:
+          credit_ind_aa_plus: 0.35
+          credit_ind_aa: 0.3
+          credit_lgfv_aa_plus: 0.25
+          credit_ind_aaa: 0.1
+      convertible_bonds:
+        preferred_asset_weights:
+          cb_balanced_large_high: 0.5
+          cb_balanced_small_low: 0.3
+          cb_bond_large_low: 0.1
+          cb_bond_small_low: 0.1
+      equity:
+        preferred_asset_weights:
+          equity_broad: 0.4
+          equity_dividend_utility: 0.35
+          equity_fin_property: 0.15
+          equity_manufacturing: 0.1
+      alternatives:
+        preferred_asset_weights:
+          alt_gold: 0.55
+          alt_commodity: 0.15
+          alt_nonferrous: 0.1
+          alt_chemical: 0.08
+          alt_us_bond: 0.07
+          alt_reits: 0.05
+    ep_skfolio_overrides:
+      risk_aversion: 1.3
+      base_deviation_penalty: 15.0
+      turnover_penalty: 0.55
+      max_active_deviation: 0.015
+      max_sleeve_turnover: 0.06
+    signal_overlay_overrides:
+      view_application:
+        direct_tilt_enabled: false
+        ep_mean_enabled: true
+        direct_tilt_scale: 1.0
+      trend_following:
+        tilt_per_score: 0.0275
+        max_sleeve_tilt: 0.06875
+  balanced:
+    target_risk_contribution:
+      rates: 0.28
+      credit: 0.32
+      convertible_bonds: 0.06
+      equity: 0.14
+      alternatives: 0.2
+    sleeve_bounds:
+      rates:
+      - 0.23
+      - 0.53
+      credit:
+      - 0.23
+      - 0.47
+      convertible_bonds:
+      - 0.03
+      - 0.08
+      equity:
+      - 0.06
+      - 0.16
+      alternatives:
+      - 0.1
+      - 0.24
+      cash:
+      - 0.0
+      - 0.0
+    asset_overrides:
+      rates:
+        preferred_asset_weights:
+          rate_30y_curve_proxy: 0.58
+          rate_7_10y: 0.42
+      credit:
+        preferred_asset_weights:
+          credit_ind_aa_plus: 0.35
+          credit_ind_aa: 0.3
+          credit_lgfv_aa_plus: 0.25
+          credit_ind_aaa: 0.1
+      convertible_bonds:
+        preferred_asset_weights:
+          cb_balanced_large_high: 0.5
+          cb_balanced_small_low: 0.3
+          cb_bond_large_low: 0.1
+          cb_bond_small_low: 0.1
+      equity:
+        preferred_asset_weights:
+          equity_broad: 0.3
+          equity_csi1000: 0.2
+          equity_chinext: 0.12
+          equity_dividend_utility: 0.15
+          equity_manufacturing: 0.08
+          equity_healthcare: 0.05
+          equity_consumption: 0.05
+          equity_fin_property: 0.03
+          equity_cyclical: 0.02
+      alternatives:
+        preferred_asset_weights:
+          alt_gold: 0.55
+          alt_commodity: 0.15
+          alt_nonferrous: 0.1
+          alt_chemical: 0.08
+          alt_us_bond: 0.07
+          alt_reits: 0.05
+    ep_skfolio_overrides:
+      risk_aversion: 1.1
+      base_deviation_penalty: 12.0
+      turnover_penalty: 0.45
+      max_active_deviation: 0.022
+      max_sleeve_turnover: 0.08
+    signal_overlay_overrides:
+      view_application:
+        direct_tilt_enabled: true
+        ep_mean_enabled: false
+        direct_tilt_scale: 0.5
+      trend_following:
+        tilt_per_score: 0.03
+        max_sleeve_tilt: 0.075
+  high_vol:
+    target_risk_contribution:
+      rates: 0.23
+      credit: 0.05
+      convertible_bonds: 0.05
+      equity: 0.3
+      alternatives: 0.37
+    sleeve_bounds:
+      rates:
+      - 0.19
+      - 0.43
+      credit:
+      - 0.03
+      - 0.12
+      convertible_bonds:
+      - 0.03
+      - 0.1
+      equity:
+      - 0.17
+      - 0.35
+      alternatives:
+      - 0.23
+      - 0.41
+      cash:
+      - 0.0
+      - 0.0
+    asset_overrides:
+      rates:
+        preferred_asset_weights:
+          rate_30y_curve_proxy: 0.6
+          rate_7_10y: 0.4
+      credit:
+        preferred_asset_weights:
+          credit_ind_aa_plus: 0.35
+          credit_ind_aa: 0.3
+          credit_lgfv_aa_plus: 0.25
+          credit_ind_aaa: 0.1
+      convertible_bonds:
+        preferred_asset_weights:
+          cb_balanced_large_high: 0.5
+          cb_balanced_small_low: 0.3
+          cb_bond_large_low: 0.1
+          cb_bond_small_low: 0.1
+      equity:
+        preferred_asset_weights:
+          equity_chinext: 0.34
+          equity_csi1000: 0.3
+          equity_broad: 0.17
+          equity_dividend_utility: 0.07
+          equity_manufacturing: 0.05
+          equity_fin_property: 0.02
+          equity_healthcare: 0.03
+          equity_consumption: 0.02
+      alternatives:
+        preferred_asset_weights:
+          alt_gold: 0.5
+          alt_commodity: 0.14
+          alt_nonferrous: 0.1
+          alt_chemical: 0.06
+          alt_us_bond: 0.12
+          alt_reits: 0.08
+    ep_skfolio_overrides:
+      risk_aversion: 0.9
+      base_deviation_penalty: 8.0
+      turnover_penalty: 0.34
+      max_active_deviation: 0.036
+      max_sleeve_turnover: 0.11
+    signal_overlay_overrides:
+      view_application:
+        direct_tilt_enabled: true
+        ep_mean_enabled: false
+        direct_tilt_scale: 1.0
+      trend_following:
+        tilt_per_score: 0.05625
+        max_sleeve_tilt: 0.1375

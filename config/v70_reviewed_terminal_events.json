@@ -1,0 +1,11 @@
+{
+  "review_scope": "five_fixed_priority_positions_not_full_universe",
+  "cash_basis": "gross_before_investor_specific_tax",
+  "events": [
+    {"ts_code":"110065.SH","name":"淮矿转债","record_date":"2021-07-01","redemption_date":"2021-07-02","payment_date":"2021-07-02","last_trade_date":"2021-07-01","gross_cash_yuan_per_bond":100.262,"bonds_paid":43810,"gross_total_paid":4392478.22,"schedule_id":"1210217534","result_id":"1210398732","result_tokens":["已于2021年7月2日兑付完毕"],"review_note":"Schedule and result agree; no guessed par liquidation."},
+    {"ts_code":"113559.SH","name":"永创转债","record_date":"2021-06-25","redemption_date":"2021-06-28","payment_date":"2021-06-28","last_trade_date":"2021-06-25","gross_cash_yuan_per_bond":100.405,"bonds_paid":53120,"gross_total_paid":5333513.60,"schedule_id":"1210238874","result_id":"1210354528","result_tokens":["赎回款发放日为2021年6月28日"],"review_note":"Result balance/conversion paragraphs say 2020-06-25, inconsistent with schedule and its own 2021 event chronology; use reviewed schedule's 2021-06-25 and preserve discrepancy."},
+    {"ts_code":"113012.SH","name":"骆驼转债","record_date":"2021-09-02","redemption_date":"2021-09-03","payment_date":"2021-09-03","last_trade_date":"2021-09-02","gross_cash_yuan_per_bond":100.67,"bonds_paid":23150,"gross_total_paid":2330510.50,"schedule_id":"1210769623","result_id":"1210969591","result_tokens":["赎回款发放日为2021年9月3日"],"review_note":"Per-bond amount times count reconciles to gross total."},
+    {"ts_code":"123033.SZ","name":"金力转债","record_date":"2021-08-30","redemption_date":"2021-08-31","payment_date":"2021-09-07","last_trade_date":"2021-08-30","gross_cash_yuan_per_bond":100.83,"bonds_paid":75366,"gross_total_paid":7599153.78,"schedule_id":"1210602221","result_id":"1210982768","result_tokens":["2021年9月7日为赎回款到达","本次赎回公司共计支付赎回款"],"review_note":"Issuer clearing date 2021-09-03 is NOT investor cash date 2021-09-07."},
+    {"ts_code":"128050.SZ","name":"钧达转债","record_date":"2022-01-27","redemption_date":"2022-01-28","payment_date":"2022-02-11","last_trade_date":"2022-01-27","gross_cash_yuan_per_bond":100.21,"bonds_paid":7333,"gross_total_paid":734839.93,"schedule_id":"1212104124","result_id":"1212351925","result_tokens":["赎回款已通过可转债托管券商直接划入","2022年2月11日为投资者赎回款到账日"],"review_note":"Issuer clearing date 2022-02-09 is NOT investor cash date 2022-02-11."}
+  ]
+}

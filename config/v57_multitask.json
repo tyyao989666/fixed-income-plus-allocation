@@ -1,0 +1,20 @@
+{
+  "version": "v57_distributional_transfer",
+  "years": [2022, 2023, 2024, 2025, 2026],
+  "seeds": [17, 29, 47],
+  "maximum_epochs": 1000,
+  "minimum_epochs": 50,
+  "patience_epochs": 40,
+  "validation_every": 5,
+  "batch_size": 96,
+  "learning_rate": 0.0002,
+  "weight_decay": 0.04,
+  "quantiles": [0.1, 0.5, 0.9],
+  "ranking_weight": 0.2,
+  "downside_weight": 0.25,
+  "mean_squared_error_weight": 0.1,
+  "phase": "A_pretrained_iTransformer_frozen_encoder_nonlinear_multitask_heads",
+  "fine_tuning_requires_separate_validation_evidence": true,
+  "formal_prediction_gate": "not_assessed_no_automatic_promotion",
+  "formal_ppo_requires_certified_ledger_and_forecast_gate": true
+}

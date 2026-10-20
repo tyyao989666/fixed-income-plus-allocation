@@ -1,0 +1,41 @@
+version: "2026-07-24-no-agent-release-1"
+name: "V1 机械 MarketSkill 正式研究基线"
+agentic_included: false
+
+data_cutoffs:
+  # 38 个原始日收益序列共同可得的最近日期。
+  daily_complete_as_of: "2026-07-20"
+  # 宏观月频标签只使用已经发布的月末观测。
+  monthly_complete_as_of: "2026-06-30"
+  formal_monthly_backtest_start: "2018-03-31"
+  robust_daily_backtest_start: "2018-03-01"
+
+canonical_assets:
+  rate_30y: rate_30y_curve_proxy
+  rate_30y_definition: "前日30Y收益率/100/252 - 18.5 × 日度30Y收益率变化/100，单日截断[-15%,15%]"
+  raw_rate_30y_status: "保留在原始数据中，仅用于溯源，不进入状态卡或正式组合。"
+
+components:
+  market_view: "mechanical_market_skill_v43"
+  nine_grid: "deterministic_stock_bond_grid"
+  formal_optimizer: "EP/skfolio MeanRisk + CLARABEL"
+  covariance: "sample_shrink"
+  itransformer: "hierarchical_asset_itransformer_v14_residual_utility"
+  itransformer_direct_alpha_gate: false
+  execution_controller: "robust_execution_ppo_v1"
+  execution_controller_status: "gated_research_challenger"
+  agentic_status: "disabled"
+
+formal_artifacts:
+  state_cards: data_processed/market_state_cards_daily_v1.parquet
+  mechanical_views: data_processed/market_skill_views_mechanical_daily_v1.parquet
+  ep_views: data_processed/ep_views_daily_v1.parquet
+  formal_monthly_metrics: output/reports/v1_balanced_backtest_metrics.csv
+  formal_monthly_weights: data_processed/v1_balanced_target_weights_monthly.parquet
+  robust_summary: output/reports/robust_execution_ppo_v1_three_profile_summary.csv
+
+release_rules:
+  - "无 Agent 输出不允许混入正式结果。"
+  - "iTransformer 未通过直接 alpha 门控，只能作为 PPO 的弱状态特征。"
+  - "PPO 不可替代机械基线；仅在逐日门控通过时作为研究 challenger。"
+  - "正式月频组合与日频状态卡均使用 rate_30y_curve_proxy。"

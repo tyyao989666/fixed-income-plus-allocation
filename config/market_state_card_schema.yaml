@@ -1,0 +1,32 @@
+enabled: true
+version: market_state_card_v1
+required_fields:
+  - date
+  - cr_state
+  - r_state
+  - cb_state
+  - eq_state
+  - alt_state
+  - rb_state
+  - liquidity_shock
+  - risk_budget_score
+  - rates_detail_states
+  - cb_detail_states
+  - equity_detail_states
+  - alt_detail_states
+  - asset_detail_states
+  - state_tags
+  - skill_layers
+  - eligible_universe
+  - view_filters
+  - rule_output_object
+state_domains:
+  cr_state: [CR1, CR2, CR3, CR4, CR5]
+  r_state: [R1, R2, R3, R4, R5]
+  cb_state: [CB1, CB2, CB3, CB4, CB5]
+  eq_state: [EQ1, EQ2, EQ3, EQ4, EQ5]
+  alt_state: [ALT1, ALT2, ALT3, ALT4]
+  rb_state: [RB1, RB2, RB3, RB4]
+notes:
+  - "Rules compute states; LLMs may explain or generate bounded relative views only."
+  - "State cards must not contain unpublished macro observations."

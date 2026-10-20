@@ -1,0 +1,63 @@
+version: v2_point_in_time_multiscale_policy
+
+decision_clock:
+  timezone: Asia/Shanghai
+  signal_time: after_market_close
+  execution: next_rebalance_period
+  rule: "A feature may enter a card only when its observation or conservative effective date is not later than the decision timestamp."
+
+normalization:
+  daily:
+    method: causal_multiscale_robust
+    fast_market_path: 252
+    medium_risk_state: 756
+    structural_level: 1260
+    path_windows: [20, 60, 120]
+    rule: "Short paths drive timing; three-to-five-year percentiles anchor yields, spreads and valuations."
+  monthly:
+    method: causal_rolling_robust
+    lookback_observations: 36
+    approximate_years: 3
+    min_periods: 12
+
+feature_groups:
+  market_leading:
+    examples: [asset_ohlcv, yield_curve, credit_spread, funding_rate, equity_breadth, convertible_bond_valuation]
+    availability: same_close
+    alignment: exact_or_backward_asof
+    fill: forward_only
+    normalization: fast_or_level_by_feature_type
+  market_state:
+    examples: [cr_state, r_state, cb_state, eq_state, alt_state, rb_state, stock_bond_regime]
+    availability: derived_from_visible_inputs
+    alignment: exact_date
+    fill: forward_only
+    normalization: none_for_one_hot
+  macro_lagging:
+    examples: [cpi_yoy, industrial_production_yoy, industrial_profit_yoy]
+    availability: conservative_effective_date
+    alignment: backward_asof_on_effective_date
+    fill: forward_only_after_first_release
+    normalization: structural_1260_with_release_date_alignment
+  credit_tail_lagging:
+    examples: [rating_downgrade_pressure, credit_default_amount, credit_net_financing, cancel_issuance]
+    availability: effective_date_conservative
+    alignment: backward_asof_on_effective_date
+    fill: forward_only_after_first_release
+    normalization: medium_756_or_bounded_state_score
+
+adaptive_rebalance:
+  observation_frequency: daily
+  execution: next_period_only
+  slow_anchor_role: context_not_trigger
+  fast_trigger_windows: [20, 60, 120]
+  long_anchor_windows: [756, 1260]
+  history_confidence: "Long anchors are shrunk toward neutral until enough trailing history exists."
+
+forbidden_operations:
+  - backward_fill
+  - centered_rolling_window
+  - full_sample_quantile_winsorization
+  - full_sample_feature_selection
+  - joining_monthly_macro_by_economic_month_without_release_lag
+  - using_future_returns_in_features

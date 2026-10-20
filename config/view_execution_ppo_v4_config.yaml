@@ -1,0 +1,119 @@
+version: relative_itransformer_ep_execution_ppo_v4
+base_config: config/integrated_relative_view_v4_config.yaml
+profiles: [low_vol, balanced, high_vol]
+
+data:
+  predictions: data_processed/itransformer_daily_timing_v3_residual_robust_predictions.parquet
+  start_date: "2018-01-01"
+  deployment_start: "2023-01-01"
+  evaluation_start: "2024-01-01"
+  complete_data_as_of: "2026-07-20"
+
+target:
+  family: itransformer_ep_target
+  action_fractions: [0.0, 0.25, 0.50, 0.75, 1.0]
+  no_trade_l1:
+    low_vol: 0.006
+    balanced: 0.009
+    high_vol: 0.014
+
+reward:
+  transaction_cost_bps: 10.0
+  quadratic_impact:
+    low_vol: 0.0010
+    balanced: 0.0015
+    high_vol: 0.0020
+  reward_scale: 100.0
+  ewma_beta: 0.94
+  downside_penalty:
+    low_vol: 0.70
+    balanced: 0.50
+    high_vol: 0.30
+  relative_volatility_penalty:
+    low_vol: 0.70
+    balanced: 0.45
+    high_vol: 0.25
+  relative_drawdown_penalty:
+    low_vol: 0.70
+    balanced: 0.45
+    high_vol: 0.25
+  # A linear target-gap penalty made intermediate actions collapse to endpoints.
+  target_gap_penalty:
+    low_vol: 0.0
+    balanced: 0.0
+    high_vol: 0.0
+
+ppo:
+  torch_threads: 1
+  seeds: [17, 29, 47]
+  hidden_dim: 32
+  learning_rate: 0.00025
+  max_epochs: 1000
+  rollout_days: 252
+  episodes_per_epoch: 3
+  update_epochs: 6
+  minibatch_size: 128
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_ratio: 0.12
+  value_clip: 0.20
+  value_loss_weight: 0.50
+  entropy_weight: 0.012
+  max_grad_norm: 0.50
+  target_kl: 0.012
+  validation_fraction: 0.25
+  validation_blocks: 3
+  purge_days: 60
+  min_train_rows: 504
+  evaluation_every: 5
+  early_stop_patience: 20
+  early_stopping_min_delta: 0.00001
+  # Initialize from the causal no-trade/threshold executor using training rows
+  # only. PPO then has to improve on that policy in purged validation blocks.
+  causal_behavior_clone_epochs: 60
+  behavior_clone_teacher: one_step_oracle
+  oracle_teacher_minimum_reward_edge: 0.00002
+  causal_teacher_stride: 2
+  causal_class_balance_power: 0.50
+
+deployment:
+  minimum_best_epoch: 1
+  minimum_qualified_models: 2
+  ensemble_min_agreement: 2
+  minimum_action_probability: 0.25
+  minimum_probability_margin: 0.03
+  minimum_positive_validation_block_fraction: 0.666666
+  minimum_median_edge_vs_best_baseline: 0.00001
+  fallback_policy: threshold
+  allow_fraction_blending: false
+  single_qualified_model_blend: 0.0
+  uncertain_ensemble_blend: 0.0
+
+stress:
+  cost_bps: [10.0, 15.0, 20.0]
+  bootstrap_draws: 1000
+  bootstrap_block_days: 20
+
+formal_gate:
+  require_itransformer_research_gate: true
+  minimum_oos_annual_return_edge: 0.0
+  minimum_oos_sharpe_edge: 0.0
+  maximum_drawdown_worsening: 0.003
+  minimum_bootstrap_return_probability: 0.60
+  minimum_bootstrap_sharpe_probability: 0.55
+  minimum_positive_year_fraction: 0.60
+
+outputs:
+  model_dir: data_processed/view_execution_ppo_v4_models
+  state: data_processed/view_execution_ppo_v4_state.parquet
+  daily_pattern: output/reports/view_execution_ppo_v4_{profile}_daily.csv
+  decisions_pattern: data_processed/view_execution_ppo_v4_{profile}_decisions.parquet
+  metrics_pattern: output/reports/view_execution_ppo_v4_{profile}_metrics.csv
+  training_log_pattern: output/reports/view_execution_ppo_v4_{profile}_training_log.csv
+  validation_pattern: output/reports/view_execution_ppo_v4_{profile}_validation.csv
+  audit_csv: output/reports/view_execution_ppo_v4_point_in_time_audit.csv
+  bootstrap_csv: output/reports/view_execution_ppo_v4_paired_block_bootstrap.csv
+  policy_source_csv: output/reports/view_execution_ppo_v4_policy_source_summary.csv
+  summary: output/reports/view_execution_ppo_v4_three_profile_summary.csv
+  formal_gate: output/reports/view_execution_ppo_v4_formal_gate.json
+  report_md: output/reports/view_execution_ppo_v4_method_and_results.md

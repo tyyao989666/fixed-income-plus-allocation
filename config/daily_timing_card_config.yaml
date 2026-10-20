@@ -1,0 +1,50 @@
+enabled: true
+version: v2_daily_timing_multiscale_state_cards
+
+data:
+  start_date: "2018-01-02"
+  end_date: "2026-07-15"
+  profiles: [low_vol, balanced, high_vol]
+  market_state_path: data_processed/market_state_cards_daily_v1.parquet
+  feature_panel_path: data_processed/feature_panel_daily_v43.parquet
+  asset_returns_path: data_processed/asset_returns_daily.parquet
+  weights_pattern: data_processed/v1_{profile}_sleeve_weights_monthly.parquet
+
+windows:
+  short: 5
+  medium: 20
+  long: 60
+  path: 120
+  annual: 252
+  regime: 756
+  structural: 1260
+  percentile_window: 252
+  percentile_min_periods:
+    annual: 60
+    regime: 126
+    structural: 252
+
+thresholds:
+  risk_on_allow: 0.68
+  risk_off_block: 0.68
+  strong_module_signal: 0.70
+  credit_caution: 0.72
+  defensive_tilt: 0.72
+  small_tilt: 0.62
+
+profile_gate:
+  low_vol:
+    risk_on_scale: 0.45
+    max_action_hint: 0.005
+  balanced:
+    risk_on_scale: 0.75
+    max_action_hint: 0.010
+  high_vol:
+    risk_on_scale: 1.00
+    max_action_hint: 0.015
+
+outputs:
+  cards: data_processed/daily_timing_state_cards.parquet
+  latest_csv: output/reports/daily_timing_state_cards_latest.csv
+  summary_csv: output/reports/daily_timing_card_summary.csv
+  notes_md: output/reports/daily_timing_state_cards_notes.md

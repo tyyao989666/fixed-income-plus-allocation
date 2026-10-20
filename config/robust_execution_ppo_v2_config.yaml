@@ -1,0 +1,91 @@
+version: robust_execution_ppo_v2
+base_config: config/integrated_daily_view_ppo_config.yaml
+profiles: [low_vol, balanced, high_vol]
+
+data:
+  predictions: data_processed/hierarchical_asset_itransformer_v14_residual_utility_sleeve_predictions.parquet
+  start_date: "2018-03-01"
+  deployment_start: "2022-01-01"
+  evaluation_start: "2024-01-01"
+
+target:
+  family: rules_only
+  action_fractions: [0.0, 1.0]
+  no_trade_l1:
+    low_vol: 0.006
+    balanced: 0.009
+    high_vol: 0.014
+
+reward:
+  transaction_cost_bps: 5.0
+  reward_scale: 100.0
+  ewma_beta: 0.94
+  downside_penalty:
+    low_vol: 0.65
+    balanced: 0.45
+    high_vol: 0.25
+  relative_volatility_penalty:
+    low_vol: 0.60
+    balanced: 0.40
+    high_vol: 0.20
+  relative_drawdown_penalty:
+    low_vol: 0.60
+    balanced: 0.40
+    high_vol: 0.20
+  target_gap_penalty:
+    low_vol: 0.0
+    balanced: 0.0
+    high_vol: 0.0
+
+ppo:
+  torch_threads: 1
+  seeds: [17, 29, 47]
+  hidden_dim: 32
+  learning_rate: 0.0003
+  max_epochs: 1000
+  rollout_days: 252
+  episodes_per_epoch: 3
+  update_epochs: 6
+  minibatch_size: 128
+  gamma: 0.995
+  gae_lambda: 0.95
+  clip_ratio: 0.15
+  value_clip: 0.20
+  value_loss_weight: 0.50
+  entropy_weight: 0.005
+  max_grad_norm: 0.50
+  target_kl: 0.015
+  validation_fraction: 0.25
+  validation_blocks: 3
+  purge_days: 20
+  min_train_rows: 504
+  evaluation_every: 5
+  early_stop_patience: 12
+  early_stopping_min_delta: 0.00001
+
+deployment:
+  minimum_best_epoch: 1
+  minimum_qualified_models: 2
+  ensemble_min_agreement: 2
+  minimum_action_probability: 0.50
+  minimum_probability_margin: 0.00
+  minimum_positive_validation_block_fraction: 0.666666
+  minimum_median_edge_vs_best_baseline: 0.00001
+  fallback_policy: threshold
+
+stress:
+  cost_bps: [5.0, 10.0, 20.0]
+  bootstrap_draws: 1000
+  bootstrap_block_days: 20
+
+outputs:
+  model_dir: data_processed/robust_execution_ppo_v2_models
+  state: data_processed/robust_execution_ppo_v2_state.parquet
+  daily_pattern: output/reports/robust_execution_ppo_v2_{profile}_daily.csv
+  decisions_pattern: data_processed/robust_execution_ppo_v2_{profile}_decisions.parquet
+  metrics_pattern: output/reports/robust_execution_ppo_v2_{profile}_metrics.csv
+  training_log_pattern: output/reports/robust_execution_ppo_v2_{profile}_training_log.csv
+  validation_pattern: output/reports/robust_execution_ppo_v2_{profile}_validation.csv
+  audit_csv: output/reports/robust_execution_ppo_v2_point_in_time_audit.csv
+  summary: output/reports/robust_execution_ppo_v2_three_profile_summary.csv
+  report_md: output/reports/robust_execution_ppo_v2_method_and_results.md

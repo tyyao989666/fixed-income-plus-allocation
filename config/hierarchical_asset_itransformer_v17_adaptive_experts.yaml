@@ -1,0 +1,52 @@
+base_config: hierarchical_asset_itransformer_v16_direct_rank.yaml
+version: hierarchical_asset_itransformer_v17_adaptive_experts
+
+data:
+  signal_expert_windows_days: [5, 20, 60, 120, 252]
+  signal_expert_reversal_windows_days: [5, 20]
+  include_card_rank_expert: true
+  include_mechanical_view_expert: true
+
+model:
+  prediction_target_mode: direct_rank
+  prediction_head_mode: adaptive_expert_mixture
+  expert_initial_baseline_probability: 0.97
+  expert_adaptation_scale: 0.45
+  expert_gate_temperature: 1.25
+  expert_gate_deviation_weight: 0.10
+  learning_rate: 0.000075
+  minimum_epochs: 30
+  patience: 40
+  scheduler_decay_epochs: 160
+  checkpoint_rank_reward: 0.75
+  training_augmentation:
+    enabled: true
+    local_feature_dropout: 0.02
+    macro_feature_dropout: 0.02
+    time_block_probability: 0.08
+    time_block_days: 3
+    noise_std: 0.008
+
+outputs:
+  dataset_npz: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_dataset.npz
+  metadata: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_metadata.json
+  label_diagnostics: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_label_diagnostics.csv
+  model_dir: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v17_adaptive_experts_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v17_adaptive_experts_point_in_time_audit.csv

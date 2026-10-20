@@ -1,0 +1,113 @@
+enabled: true
+version: v6_itransformer_daily_ohlcv_multiscale_pit
+
+data:
+  start_date: "2018-01-02"
+  train_end: "2022-12-31"
+  val_end: "2023-12-31"
+  prediction_start: "2022-01-31"
+  label_end: "2026-07-15"
+  horizon_months: 1
+  sequence_length_days: 120
+  target_sleeves: [rates, credit, convertible_bonds, equity, alternatives]
+  feature_prefixes: [rate_, credit_, funding_, cb_, equity_, alt_]
+  required_panel_features:
+    - rate_treasury_y10
+    - rate_treasury_y30
+    - credit_spread_aaa_3y_proxy
+    - credit_spread_aa_3y_proxy
+    - funding_dr007
+    - funding_shibor_3m
+    - cb_cb_price_median
+    - cb_cb_premium_median
+    - equity_csi1000_pe
+    - equity_csi1000_pb
+    - alt_us_10y_yield
+    - alt_usd_index
+    - alt_nanhua_commodity
+    - alt_gold_au9999
+    - alt_real_rate_proxy
+    - alt_reits_distribution_yield
+  required_transformed_patterns:
+    - "^(rate_treasury_y10|rate_treasury_y30|credit_spread_aaa_3y_proxy|credit_spread_aa_3y_proxy|funding_dr007|funding_shibor_3m|cb_cb_price_median|cb_cb_premium_median|equity_csi1000_pe|equity_csi1000_pb|alt_us_10y_yield|alt_usd_index|alt_nanhua_commodity|alt_gold_au9999|alt_real_rate_proxy|alt_reits_distribution_yield)(__delta_20|__pct_756|__pct_1260)?$"
+  max_panel_features: 64
+  max_base_features: 200
+  max_total_features: 240
+  include_market_state: true
+  include_sleeve_daily_features: true
+  daily_windows: [5, 20, 60, 120]
+  preprocessing:
+    method: causal_multiscale_robust
+    clip: 5.0
+    include_availability_flags: true
+    availability_flag_min_missing_rate: 0.01
+    group_priority: [passthrough, fast, slow, level]
+    groups:
+      passthrough:
+        patterns: ["(__available$|^cr_state_|^r_state_|^cb_state_|^eq_state_|^alt_state_|^rb_state_|_score$|_pressure$|_overlay$|_shock$)"]
+        passthrough: true
+        lower: 0.0
+        upper: 1.0
+      fast:
+        patterns: ["(_ret_|_mom_|_vol_|_dd_|_ohlcv_|_change_[0-9]+d|_breadth_|positive_.*ratio|_ratio$|_interaction)"]
+        window: 252
+        min_periods: 60
+      slow:
+        patterns: ["(cpi|ppi|m2|social_financing|industrial_|fixed_asset|export_)"]
+        window: 1260
+        min_periods: 252
+        percentile_windows: [1260]
+        percentile_min_periods: 252
+      level:
+        patterns: ["(^rate_treasury_y|^rate_curve_|^credit_.*spread|^funding_(r|dr|FR|FDR|shibor|aaa_cd|omo_7d_rate)|^cb_cb_(price|iv|ytm|premium)|^equity_.*_(pe|pb)$|^alt_(us_10y_yield|usd_index|nanhua_commodity$|gold_au9999$|real_rate_proxy|reits_distribution_yield|treasury_y10))"]
+        window: 756
+        min_periods: 126
+        delta_windows: [20]
+        delta_scale_window: 252
+        delta_min_periods: 60
+        percentile_windows: [756, 1260]
+        percentile_min_periods: 126
+    default_group:
+      window: 756
+      min_periods: 60
+  ohlcv_features:
+    enabled: true
+    normalization_window: 20
+    winsor_quantile: 0.01
+    include_dispersion: true
+    winsor_window: 252
+    winsor_min_periods: 20
+
+synthetic_assets:
+  rate_30y_curve_proxy:
+    enabled: true
+    asset_code: rate_30y_curve_proxy
+    asset_name: 30Y国债曲线代理
+    yield_column: treasury_y30
+    modified_duration: 18.5
+    base_close: 100.0
+
+model:
+  d_model: 64
+  n_heads: 4
+  num_layers: 2
+  dropout: 0.15
+  probability_temperature: 0.03
+  epochs: 300
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  patience: 20
+  rank_loss_weight: 0.0
+  rank_temperature: 0.03
+  seed: 42
+
+experiment:
+  seeds: [7, 13, 42, 101, 202]
+
+outputs:
+  dataset: data_processed/itransformer_dataset_daily_ohlcv.parquet
+  metadata: output/reports/itransformer_daily_ohlcv_metadata.json
+  predictions: data_processed/itransformer_predictions_daily_ohlcv_norank_monthly.parquet
+  validation_report: output/reports/itransformer_daily_ohlcv_norank_validation_report.csv
+  training_log: output/reports/itransformer_daily_ohlcv_norank_training_log.csv
+  model: data_processed/itransformer_daily_ohlcv_norank_model.pt

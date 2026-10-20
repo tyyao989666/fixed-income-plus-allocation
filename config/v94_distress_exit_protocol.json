@@ -1,0 +1,14 @@
+{
+  "version": "v94",
+  "purpose": "fixed_event_risk_overlay_research_not_return_optimized",
+  "trigger_types": ["court_accepts_issuer_reorganization", "exchange_decides_security_delisting"],
+  "knowledge_convention": "first_domestic_session_after_primary_publication",
+  "execution": "previous_session_signal_then_first_observed_executable_close",
+  "actions": ["block_new_buys", "zero_target_for_affected_bond", "sell_only_if_actual_price_and_positive_volume"],
+  "never_do": ["backdate_knowledge", "erase_frozen_inventory", "assume_par_repayment", "optimize_exit_date_on_test_returns"],
+  "scope_limit": "four_remaining_inventory_cases_targeted_for_repair; not_exhaustive_all_issuer_event_coverage",
+  "retrospective_three_name_screen_inherited": true,
+  "formal_promotion_allowed": false,
+  "compare_against": "v93_same_coupon_and_execution_accounting",
+  "future_model_training": "requires_complete_return_contract_review"
+}

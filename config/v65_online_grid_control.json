@@ -1,0 +1,15 @@
+{
+  "source_dataset": "data_processed/corporate_action_v58/dataset.npz",
+  "source_split": "data_processed/task_ablation_v64/2024.npz",
+  "history_sessions": 756,
+  "half_life_sessions": 126,
+  "minimum_group_dates": 60,
+  "shrinkage_effective_labels": 126,
+  "maturity_rule": "strictly_before_query_close",
+  "controls": ["frozen_mean", "online_mean", "online_grid"],
+  "primary_diagnostic": "inner_E",
+  "parameter_search": false,
+  "train_neural_network": false,
+  "formal_promotion": false,
+  "ppo_training_allowed": false
+}

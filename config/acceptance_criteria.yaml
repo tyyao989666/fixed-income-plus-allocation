@@ -1,0 +1,5 @@
+p0:
+- Tushare connection passes
+- asset_universe.parquet non-empty
+- asset_returns_daily.parquet non-empty
+- missing source report generated

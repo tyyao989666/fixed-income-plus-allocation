@@ -1,0 +1,141 @@
+version: nine_grid_integrated_daily_itransformer_view_ppo_v6
+profiles: [low_vol, balanced, high_vol]
+
+data:
+  predictions: data_processed/itransformer_daily_timing_v2_challenger_predictions.parquet
+  state_cards: data_processed/market_state_cards_daily_v1.parquet
+  rule_views: data_processed/market_skill_views_daily_v1.parquet
+  asset_returns: data_processed/asset_returns_daily.parquet
+  risk_budget_pattern: data_processed/v1_{profile}_risk_budget_base_monthly.parquet
+  formal_sleeve_pattern: data_processed/v1_{profile}_sleeve_weights_monthly.parquet
+  formal_asset_pattern: data_processed/v1_{profile}_target_weights_monthly.parquet
+  start_date: "2022-01-01"
+  reliability_window: 60
+
+actions:
+  formal_anchor_horizon_days: 20
+  rule_horizon_days: 20
+  horizons_days: [5, 20, 60]
+  minimum_model_reliability: -0.02
+  full_model_reliability: 0.12
+  minimum_incremental_reliability: 0.02
+  full_incremental_reliability: 0.20
+  max_itransformer_weight: 0.75
+  minimum_score_spread: 0.10
+
+views:
+  rule_weight: 1.00
+  model_weight: 0.75
+  grid_positive_floor: 0.20
+  daily_mu_scale:
+    low_vol: 0.0020
+    balanced: 0.0035
+    high_vol: 0.0050
+  covariance_lookback_days: 252
+  minimum_covariance_days: 60
+  covariance_monthly_scale: 21.0
+  covariance_estimator:
+    method: sample_shrink
+    shrinkage_to_diag: 0.20
+
+optimizer:
+  low_vol:
+    base_deviation_penalty: 0.45
+    turnover_penalty: 0.00
+    max_active_deviation: 0.012
+    max_sleeve_turnover: 0.04
+  balanced:
+    base_deviation_penalty: 0.25
+    turnover_penalty: 0.00
+    max_active_deviation: 0.022
+    max_sleeve_turnover: 0.08
+  high_vol:
+    base_deviation_penalty: 0.15
+    turnover_penalty: 0.00
+    max_active_deviation: 0.036
+    max_sleeve_turnover: 0.11
+
+trend_brake:
+  enabled: true
+  lookbacks_days: [63, 126, 252]
+  weak_threshold: -0.35
+  max_underweight_from_base:
+    low_vol: 0.004
+    balanced: 0.008
+    high_vol: 0.015
+  affected_sleeves: [convertible_bonds, equity, alternatives]
+
+reward:
+  transaction_cost_bps: 5.0
+  downside_penalty: 0.35
+  relative_volatility_penalty:
+    low_vol: 0.75
+    balanced: 0.50
+    high_vol: 0.20
+  relative_drawdown_penalty:
+    low_vol: 0.50
+    balanced: 0.35
+    high_vol: 0.15
+  active_deviation_penalty: 0.004
+  reward_scale: 100.0
+
+ppo:
+  seeds: [17, 29, 47]
+  hidden_dim: 64
+  learning_rate: 0.0005
+  max_epochs: 160
+  updates_per_epoch: 4
+  gamma: 0.98
+  gae_lambda: 0.90
+  clip_ratio: 0.15
+  value_loss_weight: 0.50
+  entropy_weight: 0.005
+  behavior_clone_epochs: 40
+  behavior_clone_class_balance_power: 0.50
+  teacher_stride: 2
+  teacher_reward_modes: [cumulative]
+  teacher_reference_horizon_days: 20
+  minimum_teacher_edge: 0.01
+  validation_fraction: 0.20
+  min_train_rows: 120
+  evaluation_every: 10
+  early_stop_patience: 5
+  early_stopping_min_delta: 0.0001
+  minimum_policy_validation_reward: 0.002
+  minimum_qualified_models: 2
+  ensemble_min_agreement: 2
+
+deployment:
+  base_action:
+    low_vol: formal_anchor
+    balanced: formal_anchor
+    high_vol: rules_only
+  allowed_action_families:
+    low_vol: [formal_anchor, baseline_adaptive, model, noop]
+    balanced: [formal_anchor, baseline_adaptive, model, noop]
+    high_vol: [rules_only, formal_anchor, baseline_adaptive, model, noop]
+  minimum_validation_edge_vs_base: 0.002
+  minimum_family_probability: 0.40
+  minimum_probability_margin: 0.08
+
+gate:
+  evaluation_start: "2024-01-01"
+  min_sharpe_delta_vs_formal: 0.00
+  min_sharpe_delta_vs_rule_only: 0.00
+  min_annual_return_delta_vs_formal: 0.00
+  max_drawdown_worsening: 0.005
+  min_model_actions: 3
+
+outputs:
+  model_dir: data_processed/integrated_daily_view_ppo_models
+  daily_pattern: output/reports/integrated_daily_view_ppo_{profile}_daily.csv
+  decisions_pattern: data_processed/integrated_daily_view_ppo_{profile}_decisions.parquet
+  holdings_pattern: data_processed/integrated_daily_view_ppo_{profile}_asset_weights_daily.parquet
+  metrics_pattern: output/reports/integrated_daily_view_ppo_{profile}_metrics.csv
+  training_log_pattern: output/reports/integrated_daily_view_ppo_{profile}_training_log.csv
+  summary: output/reports/integrated_daily_view_ppo_three_profile_summary.csv
+  audit_csv: output/reports/integrated_daily_view_ppo_point_in_time_audit.csv
+  gate_report: output/reports/integrated_daily_view_ppo_formal_gate.json
+  report_md: output/reports/integrated_daily_view_ppo_method_and_results.md
+  visual_png: output/reports/integrated_daily_view_ppo_dashboard.png
+  visual_html: output/reports/integrated_daily_view_ppo_visual_report.html

@@ -1,0 +1,48 @@
+base_config: hierarchical_asset_itransformer_v20_anchored_boost.yaml
+version: hierarchical_asset_itransformer_v21_continuous_utility
+
+data:
+  target_mode: relative_return_utility
+  relative_utility_clip: 3.0
+  # The product can trade only on the domestic market calendar. The macro
+  # panel is a union calendar and contains foreign-market days; using it as
+  # the sequence index would turn 5/20/60 "days" into mixed calendar periods.
+  trading_calendar_mode: anchor_asset
+  trading_calendar_anchor_asset: equity_broad
+
+model:
+  # Continuous labels preserve the strength of relative moves and avoid
+  # arbitrary tie-breaking caused by adding a tiny correction to discrete ranks.
+  prediction_target_mode: anchored_rank_boost
+  training_correction_scale: 0.75
+  residual_shrinkage_weight: 0.10
+  # Checkpoint selection measures a deliberately shrunk correction. Deployment
+  # alpha is still selected only from already-realized prior walk-forward OOS.
+  validation_correction_alpha: 0.10
+  # Incremental IC is measured in basis-point-like units; the inherited 0.001
+  # tolerance was too coarse and could freeze an earlier, inferior checkpoint.
+  min_delta: 0.00010
+
+outputs:
+  dataset_npz: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_dataset.npz
+  metadata: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_metadata.json
+  label_diagnostics: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_label_diagnostics.csv
+  model_dir: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_models
+  asset_predictions: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_asset_predictions.parquet
+  sleeve_predictions: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_sleeve_predictions.parquet
+  training_log: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_training_log.csv
+  training_progress: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_training_progress.jsonl
+  validation_report: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_validation.csv
+  gate_report: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_gate.json
+  report_md: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_method_and_results.md
+  target_weights_pattern: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_{profile}_targets_daily.parquet
+  decisions_pattern: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_{profile}_decisions.parquet
+  holdings_pattern: data_processed/hierarchical_asset_itransformer_v21_continuous_utility_{profile}_weights_daily.parquet
+  daily_pattern: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_{profile}_daily.csv
+  metrics_pattern: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_{profile}_metrics.csv
+  controller_log_pattern: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_{profile}_controller_training.csv
+  portfolio_summary: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_three_profile_summary.csv
+  v6_comparison: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_vs_v6_comparison.csv
+  portfolio_gate: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_portfolio_gate.json
+  portfolio_report: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_portfolio_results.md
+  audit: output/reports/hierarchical_asset_itransformer_v21_continuous_utility_point_in_time_audit.csv
