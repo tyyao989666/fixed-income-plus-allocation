@@ -38,6 +38,8 @@ environments and duplicate legacy export packages are excluded.
 
 ## Download The Complete Dataset
 
+中文操作说明：[完整数据下载与运行](docs/完整数据下载与运行.md)。
+
 After cloning the repository, run:
 
 ```bash
